@@ -1,7 +1,5 @@
 package com.ianorourke.fdrflightrecorder.FDR;
 
-import android.util.Log;
-
 /**
  * Created by ian on 5/8/15.
  */
