@@ -86,10 +86,10 @@ public class FDRFormatter {
         //Radar Height, Aileron Ratio, Elevator Ratio, Rudder Ratio
         builder.append("0,0,0,0,");
 
-        builder.append(pitch);
+        builder.append(String.format("%.2f", pitch));
         builder.append(',');
 
-        builder.append(roll);
+        builder.append(String.format("%.2f", roll));
         builder.append(',');
 
         builder.append(heading);
@@ -116,8 +116,6 @@ public class FDRFormatter {
         builder.append("0,0,0,0,0,0,0,0,0,0,");
 
         builder.append('\n');
-
-        Log.v("FDR", builder.toString());
 
         return builder.toString();
     }

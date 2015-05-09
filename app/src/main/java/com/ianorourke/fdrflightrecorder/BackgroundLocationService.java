@@ -18,11 +18,26 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.ianorourke.fdrflightrecorder.FDR.FDRFormatter;
+import com.ianorourke.fdrflightrecorder.FDR.FDRLog;
+import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by ian on 5/8/15.
  */
-public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, GyroscopeReader.GyroscopeReaderInterface {
+    private static boolean running = false;
+
+    public static boolean isRunning() {
+        return running;
+    }
+
     IBinder mBinder = new LocalBinder();
 
     public class LocalBinder extends Binder {
@@ -40,14 +55,31 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private LocationRequest locationRequest;
 
     private NotificationManager notificationManager;
+    private Notification.Builder notificationBuilder;
 
-    private Location currentLoc;
+    private LatLng currentLoc;
 
-    private static boolean serviceStarted = false;
+    private GyroscopeReader gyroscopeReader;
 
-    public static boolean isServiceStarted() {
-        return serviceStarted;
-    }
+    private FDRLog fdrLog;
+    private FDRFormatter fdrFormatter;
+
+    private Timer updateTimer;
+    private int timeInterval = 1000;
+
+    private double altitude = 0.0;
+    private float accuracy = 0.0f;
+    private int heading = 0;
+    private float speed = 0.0f;
+
+    private float roll = 0.0f;
+    private float pitch = 0.0f;
+
+    private long startTime;
+
+    private final int NOTIFICATION_ID = 101;
+    private final float METERS_TO_FEET = 3.28f;
+    private final float MS_TO_KNOTS = 1.94384f;
 
     @Override
     public void onCreate() {
@@ -60,40 +92,96 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 .build();
 
         locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        locationRequest.setInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(timeInterval / 2);
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        gyroscopeReader = new GyroscopeReader(this);
+        gyroscopeReader.setInterface(this);
+
+        Calendar c = GregorianCalendar.getInstance();
+        fdrLog = new FDRLog(c, null, null, null, null);
+
+        fdrFormatter = new FDRFormatter();
+        fdrFormatter.setSeconds(0);
+
+        updateTimer = new Timer(false);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
-        serviceStarted = true;
-
-        if (mGoogleApiClient == null) Log.v("FDR", "Google Api Client Null");
+        if (mGoogleApiClient == null) Log.v("FDR", "Google API Client Null");
         if (locationRequest == null) Log.v("FDR", "Location Request Null");
 
         Intent viewIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
 
-        Notification.Builder builder = new Notification.Builder(getApplicationContext());
-        builder.setContentTitle(getText(R.string.app_name));
-        builder.setContentTitle("Location Service");
-        builder.setOngoing(true);
-        builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentIntent(pendingIntent);
-        Notification notification = builder.build();
+        notificationBuilder = new Notification.Builder(getApplicationContext());
+        notificationBuilder.setContentTitle(getText(R.string.app_name));
+        notificationBuilder.setContentText("Location Service Connecting...");
+        notificationBuilder.setOngoing(true);
+        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        notificationBuilder.setContentIntent(pendingIntent);
 
-        notificationManager.notify(101, notification);
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+
+        mGoogleApiClient.connect();
+
+        gyroscopeReader.setEnabled(true);
+
+        startTime = System.currentTimeMillis();
+
+        updateTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (currentLoc == null) return;
+
+                fdrFormatter.setLat(currentLoc.latitude);
+                fdrFormatter.setLon(currentLoc.longitude);
+                fdrFormatter.setAltitude((int) altitude);
+                fdrFormatter.setHeading(heading);
+                fdrFormatter.setAirspeed(speed);
+
+                fdrFormatter.setRoll(roll);
+                fdrFormatter.setPitch(pitch);
+
+                fdrFormatter.setSeconds((int) (System.currentTimeMillis() - startTime) / 1000);
+
+                Log.v("FDR", fdrFormatter.getData());
+            }
+        }, 0, timeInterval);
+
+        Log.v("FDR", "Service Started");
+        running = true;
 
         return START_STICKY;
     }
 
     @Override
+    public void receivedValues(float x, float y) {
+        roll = x;
+        pitch = y;
+
+        //Log.v("FDR", "Roll: " + x + ", Pitch: " + y);
+    }
+
+    @Override
     public void onLocationChanged(Location location) {
-        currentLoc = location;
+        if (location == null) {
+            Log.v("FDR", "Null Location");
+            return;
+        }
+        currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
+        altitude = location.getAltitude() * METERS_TO_FEET;
+        accuracy = location.getAccuracy() * METERS_TO_FEET;
+        heading = (int) location.getBearing();
+        speed = location.getSpeed() * MS_TO_KNOTS;
+
+        notificationBuilder.setContentText("Accuracy: " + ((int) accuracy) + " Feet");
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
     @Override
@@ -123,10 +211,16 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
         mGoogleApiClient = null;
 
-        serviceStarted = false;
+        if (updateTimer != null) updateTimer.cancel();
+        updateTimer = null;
+
         notificationManager.cancelAll();
 
+        Log.v("FDR", "Service Destroyed");
+
         super.onDestroy();
+
+        running = false;
 
         stopSelf();
     }

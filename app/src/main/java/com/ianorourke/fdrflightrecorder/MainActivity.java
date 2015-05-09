@@ -1,5 +1,6 @@
 package com.ianorourke.fdrflightrecorder;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,12 +9,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import com.ianorourke.fdrflightrecorder.FDR.FDRFormatter;
-import com.ianorourke.fdrflightrecorder.FDR.FDRLog;
-
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 public class MainActivity extends FragmentActivity {
 
@@ -24,30 +19,18 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpMapIfNeeded();
-
-        Calendar c = GregorianCalendar.getInstance();
-        FDRLog log = new FDRLog(c, null, null, null, null);
-
-        FDRFormatter logFile = new FDRFormatter();
-        logFile.setAirspeed(200);
-        logFile.setAltitude(1000);
-        logFile.setPitch(30);
-        logFile.setSeconds(0);
-
-        log.appendData(logFile);
-
-        logFile.setSeconds(10);
-
-        log.appendData(logFile);
-
-
-        Log.v("FDR", log.getLog());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+
+        if (!BackgroundLocationService.isRunning()) {
+            Intent serviceIntent = new Intent(getApplicationContext(), BackgroundLocationService.class);
+            getApplicationContext().startService(serviceIntent);
+            Log.v("FDR", "Service Started");
+        }
     }
 
     /**
