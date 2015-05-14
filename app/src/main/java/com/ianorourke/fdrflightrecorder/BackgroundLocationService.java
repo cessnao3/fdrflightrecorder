@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,6 +24,11 @@ import com.ianorourke.fdrflightrecorder.FDR.FDRFormatter;
 import com.ianorourke.fdrflightrecorder.FDR.FDRLog;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Timer;
@@ -81,6 +87,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private final float METERS_TO_FEET = 3.28f;
     private final float MS_TO_KNOTS = 1.94384f;
 
+    private String filename;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -101,6 +109,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         gyroscopeReader.setInterface(this);
 
         Calendar c = GregorianCalendar.getInstance();
+        filename = (new SimpleDateFormat("MM-dd-yyyy HH-mm-ss")).format(c.getTime()) + getString(R.string.file_ext);
+
         fdrLog = new FDRLog(c, null, null, null, null);
 
         fdrFormatter = new FDRFormatter();
@@ -149,6 +159,14 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 fdrFormatter.setPitch(pitch);
 
                 fdrFormatter.setSeconds((int) (System.currentTimeMillis() - startTime) / 1000);
+
+                fdrLog.appendData(fdrFormatter);
+
+                Intent intent = new Intent();
+                intent.setAction(getString(R.string.map_intent));
+                intent.putExtra(getString(R.string.map_lat), currentLoc.latitude);
+                intent.putExtra(getString(R.string.map_lon), currentLoc.longitude);
+                sendBroadcast(intent);
 
                 Log.v("FDR", fdrFormatter.getData());
             }
@@ -221,6 +239,21 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         super.onDestroy();
 
         running = false;
+
+        try {
+            File file = new File(Environment.getExternalStorageDirectory(), filename);
+            if (!file.exists()) file.createNewFile();
+
+            FileWriter fileWriter = new FileWriter(file, false);
+
+            fileWriter.write(fdrLog.getLog());
+
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            Log.v("FDR", e.toString());
+            e.printStackTrace();
+        }
 
         stopSelf();
     }

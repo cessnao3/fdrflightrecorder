@@ -8,8 +8,6 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 public class GyroscopeReader implements SensorEventListener {
-
-    private boolean hasSensor = false;
     private boolean initialized = false;
 
     private SensorManager sensorManager;
@@ -48,12 +46,9 @@ public class GyroscopeReader implements SensorEventListener {
             if (gyroscopeSensor != null) {
                 if (initialized) return;
 
-                hasSensor = true;
-
                 sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_GAME);
                 initialized = true;
             } else {
-                hasSensor = false;
                 Log.v("FDR", "No sensor");
             }
         } else {

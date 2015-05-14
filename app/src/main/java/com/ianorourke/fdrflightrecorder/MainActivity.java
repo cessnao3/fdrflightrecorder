@@ -1,18 +1,24 @@
 package com.ianorourke.fdrflightrecorder;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    protected Marker mLocationMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,12 +31,6 @@ public class MainActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
-
-        if (!BackgroundLocationService.isRunning()) {
-            Intent serviceIntent = new Intent(getApplicationContext(), BackgroundLocationService.class);
-            getApplicationContext().startService(serviceIntent);
-            Log.v("FDR", "Service Started");
-        }
     }
 
     /**
@@ -68,6 +68,27 @@ public class MainActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        //mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
+    public void onStartStopClick(View v) {
+        Button button = (Button) v;
+
+        Intent serviceIntent = new Intent(getApplicationContext(), BackgroundLocationService.class);
+
+        if (!BackgroundLocationService.isRunning()) {
+
+            getApplicationContext().startService(serviceIntent);
+
+            button.setText("Stop Service");
+
+            Log.v("FDR", "Service Started");
+        } else {
+            stopService(serviceIntent);
+
+            button.setText("Start Service");
+
+            Log.v("FDR", "Service Stopped");
+        }
     }
 }
