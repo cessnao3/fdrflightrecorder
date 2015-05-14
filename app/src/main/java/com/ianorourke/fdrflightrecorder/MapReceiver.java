@@ -13,10 +13,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
  */
 public class MapReceiver extends BroadcastReceiver {
     public interface MapDataInterface {
-        public void OnLocationReceive(double lat, double lon);
+        void onLocationReceive(double lat, double lon);
     }
 
-    public static MapDataInterface dataInterface;
+    public static MapDataInterface dataInterface = null;
 
     @Override
     public void onReceive(Context c, Intent i) {
@@ -26,5 +26,7 @@ public class MapReceiver extends BroadcastReceiver {
         LatLng location = new LatLng(lat, lon);
 
         Log.v("FDR", location.toString());
+
+        if (dataInterface != null) dataInterface.onLocationReceive(lat, lon);
     }
 }

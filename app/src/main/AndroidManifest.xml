@@ -41,9 +41,7 @@
 
         <receiver android:name=".MapReceiver">
             <intent-filter>
-                <!--<action android:name="com.ianorourke.MAP_LOCATION">
-                </action>-->
-                <action android:name="@string/map_intent">
+                <action android:name="com.ianorourke.MAP_LOCATION">
                 </action>
             </intent-filter>
         </receiver>

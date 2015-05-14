@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -51,6 +52,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             return BackgroundLocationService.this;
         }
     }
+
+    PowerManager.WakeLock wakeLock;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -123,6 +126,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
+        PowerManager mgr = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getString(R.string.service_wakelock));
+        wakeLock.acquire();
+
         if (mGoogleApiClient == null) Log.v("FDR", "Google API Client Null");
         if (locationRequest == null) Log.v("FDR", "Location Request Null");
 
@@ -168,7 +175,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 intent.putExtra(getString(R.string.map_lon), currentLoc.longitude);
                 sendBroadcast(intent);
 
-                Log.v("FDR", fdrFormatter.getData());
+                //Log.v("FDR", fdrFormatter.getData());
             }
         }, 0, timeInterval);
 
@@ -225,6 +232,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     @Override
     public void onDestroy() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+
+        wakeLock.release();
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
         mGoogleApiClient = null;

@@ -2,9 +2,11 @@
     <string name="app_name">FDR Flight Recorder</string>
     <string name="title_activity_main">Map</string>
 
-    <string name="map_intent">com.ianorourke.MAP_LOCATION</string>
+    <string name="map_intent" translatable="false">com.ianorourke.MAP_LOCATION</string>
     <string name="map_lat">LAT</string>
     <string name="map_lon">LON</string>
 
     <string name="file_ext">.fdr</string>
+
+    <string name="service_wakelock">map_service_wake_lock</string>
 </resources>

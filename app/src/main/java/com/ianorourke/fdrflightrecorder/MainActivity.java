@@ -9,13 +9,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements MapReceiver.MapDataInterface {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     protected Marker mLocationMarker;
@@ -25,6 +26,8 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpMapIfNeeded();
+
+        MapReceiver.dataInterface = this;
     }
 
     @Override
@@ -90,5 +93,24 @@ public class MainActivity extends FragmentActivity {
 
             Log.v("FDR", "Service Stopped");
         }
+    }
+
+    public void onLocationReceive(double lat, double lon) {
+        if (mMap != null) {
+            if (mLocationMarker == null) {
+                mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Location").position(new LatLng(lat, lon)));
+            } else {
+                mLocationMarker.setPosition(new LatLng(lat, lon));
+            }
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), 12.0f));
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        MapReceiver.dataInterface = null;
     }
 }
