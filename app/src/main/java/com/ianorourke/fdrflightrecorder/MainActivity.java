@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -78,32 +80,32 @@ public class MainActivity extends FragmentActivity implements MapReceiver.MapDat
         Button button = (Button) v;
 
         Intent serviceIntent = new Intent(getApplicationContext(), BackgroundLocationService.class);
+        serviceIntent.putExtra(getString(R.string.service_soundstart), ((CheckBox) findViewById(R.id.checkbox_sound_start)).isChecked());
 
         if (!BackgroundLocationService.isRunning()) {
-
             getApplicationContext().startService(serviceIntent);
-
             button.setText("Stop Service");
-
             Log.v("FDR", "Service Started");
         } else {
             stopService(serviceIntent);
-
             button.setText("Start Service");
-
             Log.v("FDR", "Service Stopped");
         }
     }
 
     public void onLocationReceive(double lat, double lon) {
         if (mMap != null) {
+            CameraUpdate cameraUpdate;
+
             if (mLocationMarker == null) {
                 mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Location").position(new LatLng(lat, lon)));
+                cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), 12.0f);
+                mMap.moveCamera(cameraUpdate);
             } else {
                 mLocationMarker.setPosition(new LatLng(lat, lon));
+                cameraUpdate = CameraUpdateFactory.newLatLng(mLocationMarker.getPosition());
+                mMap.animateCamera(cameraUpdate);
             }
-
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), 12.0f));
         }
     }
 

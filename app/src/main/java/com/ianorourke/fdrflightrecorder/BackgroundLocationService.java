@@ -24,9 +24,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.ianorourke.fdrflightrecorder.FDR.FDRFormatter;
 import com.ianorourke.fdrflightrecorder.FDR.FDRLog;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
+import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -35,10 +35,7 @@ import java.util.GregorianCalendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by ian on 5/8/15.
- */
-public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, GyroscopeReader.GyroscopeReaderInterface {
+public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, GyroscopeReader.GyroscopeReaderInterface, SoundStart.SoundStartInterface {
     private static boolean running = false;
 
     public static boolean isRunning() {
@@ -70,27 +67,27 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     private GyroscopeReader gyroscopeReader;
 
+    private boolean isStarted = false;
+
+    private SoundStart soundStart;
+    private int MIN_AMPLITUDE = 15000;
+    private int NUM_HOLD_SECONDS = 5;
+
     private FDRLog fdrLog;
     private FDRFormatter fdrFormatter;
 
     private Timer updateTimer;
     private int timeInterval = 1000;
 
-    private double altitude = 0.0;
-    private float accuracy = 0.0f;
-    private int heading = 0;
-    private float speed = 0.0f;
-
-    private float roll = 0.0f;
-    private float pitch = 0.0f;
-
-    private long startTime;
+    private long startTime = 0;
 
     private final int NOTIFICATION_ID = 101;
     private final float METERS_TO_FEET = 3.28f;
     private final float MS_TO_KNOTS = 1.94384f;
 
     private String filename;
+
+    private boolean soundStartEnabled;
 
     @Override
     public void onCreate() {
@@ -111,6 +108,45 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         gyroscopeReader = new GyroscopeReader(this);
         gyroscopeReader.setInterface(this);
 
+        soundStart = new SoundStart(MIN_AMPLITUDE, NUM_HOLD_SECONDS, this);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
+        soundStartEnabled = intent.getBooleanExtra(getString(R.string.service_soundstart), false);
+
+        // Checking if Null
+        if (mGoogleApiClient == null) Log.v("FDR", "Google API Client Null");
+        if (locationRequest == null) Log.v("FDR", "Location Request Null");
+
+        if (mGoogleApiClient == null || locationRequest == null) {
+            stopSelf();
+            return START_NOT_STICKY;
+        } else {
+            mGoogleApiClient.connect();
+        }
+
+        // Wakelock
+        PowerManager mgr = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getString(R.string.service_wakelock));
+        wakeLock.acquire();
+
+        // Notification
+        Intent viewIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
+
+        notificationBuilder = new Notification.Builder(getApplicationContext());
+        notificationBuilder.setContentTitle(getText(R.string.app_name) + " Experimental");
+        notificationBuilder.setContentText("Location Service Connecting...");
+        notificationBuilder.setOngoing(true);
+        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        notificationBuilder.setContentIntent(pendingIntent);
+
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+
+        // Creating File and Log
         Calendar c = GregorianCalendar.getInstance();
         filename = (new SimpleDateFormat("MM-dd-yyyy HH-mm-ss")).format(c.getTime()) + getString(R.string.file_ext);
 
@@ -120,53 +156,38 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         fdrFormatter.setSeconds(0);
 
         updateTimer = new Timer(false);
+
+        Log.v("FDR", "Service Started");
+        running = true;
+
+        if (soundStartEnabled)
+            soundStart.triggerSoundStart();
+        else
+            startLog();
+
+        return START_STICKY;
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
+    public void onSoundStartSuccess() {
+        startLog();
+    }
 
-        PowerManager mgr = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getString(R.string.service_wakelock));
-        wakeLock.acquire();
+    private void startLog() {
+        Log.v("FDR", "Log Started");
 
-        if (mGoogleApiClient == null) Log.v("FDR", "Google API Client Null");
-        if (locationRequest == null) Log.v("FDR", "Location Request Null");
+        isStarted = true;
 
-        Intent viewIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
-
-        notificationBuilder = new Notification.Builder(getApplicationContext());
-        notificationBuilder.setContentTitle(getText(R.string.app_name));
-        notificationBuilder.setContentText("Location Service Connecting...");
-        notificationBuilder.setOngoing(true);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
-        notificationBuilder.setContentIntent(pendingIntent);
-
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
-
-        mGoogleApiClient.connect();
-
-        gyroscopeReader.setEnabled(true);
-
-        startTime = System.currentTimeMillis();
+        startTime = 0;
 
         updateTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (currentLoc == null) return;
+                if (startTime == 0) startTime = System.currentTimeMillis();
 
-                fdrFormatter.setLat(currentLoc.latitude);
-                fdrFormatter.setLon(currentLoc.longitude);
-                fdrFormatter.setAltitude((int) altitude);
-                fdrFormatter.setHeading(heading);
-                fdrFormatter.setAirspeed(speed);
+                int seconds = (int) (System.currentTimeMillis() - startTime) / 1000;
 
-                fdrFormatter.setRoll(roll);
-                fdrFormatter.setPitch(pitch);
-
-                fdrFormatter.setSeconds((int) (System.currentTimeMillis() - startTime) / 1000);
-
+                fdrFormatter.setSeconds(seconds);
                 fdrLog.appendData(fdrFormatter);
 
                 Intent intent = new Intent();
@@ -174,23 +195,14 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 intent.putExtra(getString(R.string.map_lat), currentLoc.latitude);
                 intent.putExtra(getString(R.string.map_lon), currentLoc.longitude);
                 sendBroadcast(intent);
-
-                //Log.v("FDR", fdrFormatter.getData());
             }
         }, 0, timeInterval);
-
-        Log.v("FDR", "Service Started");
-        running = true;
-
-        return START_STICKY;
     }
 
     @Override
     public void receivedValues(float x, float y) {
-        roll = x;
-        pitch = y;
-
-        //Log.v("FDR", "Roll: " + x + ", Pitch: " + y);
+        fdrFormatter.setRoll(x);
+        fdrFormatter.setPitch(y);
     }
 
     @Override
@@ -200,12 +212,20 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             return;
         }
         currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
-        altitude = location.getAltitude() * METERS_TO_FEET;
-        accuracy = location.getAccuracy() * METERS_TO_FEET;
-        heading = (int) location.getBearing();
-        speed = location.getSpeed() * MS_TO_KNOTS;
 
-        notificationBuilder.setContentText("Accuracy: " + ((int) accuracy) + " Feet");
+        fdrFormatter.setLat(currentLoc.latitude);
+        fdrFormatter.setLon(currentLoc.longitude);
+        fdrFormatter.setAltitude((int) (location.getAltitude() * METERS_TO_FEET));
+        fdrFormatter.setHeading((int) location.getBearing());
+        fdrFormatter.setAirspeed(location.getSpeed() * MS_TO_KNOTS);
+
+        float accuracy = location.getAccuracy() * METERS_TO_FEET;
+
+        if (soundStartEnabled && !isStarted) {
+            notificationBuilder.setContentText("Waiting for Sound Start...");
+        } else {
+            notificationBuilder.setContentText("Accuracy: " + ((int) accuracy) + " Feet");
+        }
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
@@ -213,7 +233,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public void onConnected(Bundle dataBundle) {
         if (locationRequest != null)
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-
     }
 
     @Override
@@ -234,6 +253,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 
         wakeLock.release();
+        wakeLock = null;
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
         mGoogleApiClient = null;
@@ -243,11 +263,12 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         notificationManager.cancelAll();
 
+        gyroscopeReader.setEnabled(false);
+
         Log.v("FDR", "Service Destroyed");
 
-        super.onDestroy();
-
         running = false;
+        isStarted = false;
 
         try {
             File file = new File(Environment.getExternalStorageDirectory(), filename);
@@ -263,6 +284,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             Log.v("FDR", e.toString());
             e.printStackTrace();
         }
+
+        super.onDestroy();
 
         stopSelf();
     }
