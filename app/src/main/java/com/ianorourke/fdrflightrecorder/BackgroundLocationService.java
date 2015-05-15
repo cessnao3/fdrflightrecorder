@@ -138,7 +138,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
 
         notificationBuilder = new Notification.Builder(getApplicationContext());
-        notificationBuilder.setContentTitle(getText(R.string.app_name) + " Experimental");
+        notificationBuilder.setContentTitle(getText(R.string.app_name));
         notificationBuilder.setContentText("Location Service Connecting...");
         notificationBuilder.setOngoing(true);
         notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
@@ -178,6 +178,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         isStarted = true;
 
         startTime = 0;
+
+        gyroscopeReader.setEnabled(true);
 
         updateTimer.schedule(new TimerTask() {
             @Override
@@ -272,14 +274,20 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         try {
             File file = new File(Environment.getExternalStorageDirectory(), filename);
-            if (!file.exists()) file.createNewFile();
 
-            FileWriter fileWriter = new FileWriter(file, false);
+            boolean success = true;
+            if (!file.exists()) success = file.createNewFile();
 
-            fileWriter.write(fdrLog.getLog());
+            if (success) {
+                FileWriter fileWriter = new FileWriter(file, false);
 
-            fileWriter.flush();
-            fileWriter.close();
+                fileWriter.write(fdrLog.getLog());
+
+                fileWriter.flush();
+                fileWriter.close();
+
+                Log.v("FDR", "File Saved: " + filename);
+            }
         } catch (IOException e) {
             Log.v("FDR", e.toString());
             e.printStackTrace();
