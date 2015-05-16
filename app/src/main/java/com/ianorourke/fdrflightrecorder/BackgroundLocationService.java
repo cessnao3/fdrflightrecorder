@@ -179,7 +179,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         startTime = 0;
 
-        gyroscopeReader.setEnabled(true);
+        gyroscopeReader.resetCalibration();
+        gyroscopeReader.setEnabled(true, true);
 
         updateTimer.schedule(new TimerTask() {
             @Override
@@ -205,6 +206,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public void receivedValues(float x, float y) {
         fdrFormatter.setRoll(x);
         fdrFormatter.setPitch(y);
+
+        Log.v("FDR", "Roll: " + x + ", Pitch: " + y);
     }
 
     @Override

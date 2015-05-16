@@ -14,6 +14,10 @@ public class GyroscopeReader implements SensorEventListener {
     private Sensor gyroscopeSensor;
 
     private float x = 0.0f, y = 0.0f;
+    private float modX = 0.0f, modY = 0.0f;
+
+    private boolean shouldCalibrate = false;
+    private boolean isReversed = false;
 
     public interface GyroscopeReaderInterface {
         public void receivedValues(float x, float y);
@@ -31,14 +35,55 @@ public class GyroscopeReader implements SensorEventListener {
         //Nothing
     }
 
+    public final void resetCalibration() {
+        modX = 0.0f;
+        modY = 0.0f;
+
+        isReversed = false;
+        shouldCalibrate = false;
+    }
+
+    public final void calibrate() {
+        modX = x;
+        modY = y;
+    }
+
     @Override
     public final void onSensorChanged(SensorEvent event) {
         float[] gravityVector = {event.values[0], event.values[1], event.values[2]};
 
-        x = (float) -Math.toDegrees(Math.atan2(gravityVector[0], gravityVector[2]));
-        y = (float) Math.toDegrees(Math.atan2(gravityVector[1], gravityVector[2]));
+        if (shouldCalibrate) {
+            isReversed = gravityVector[2] < 0.0f;
+        }
+
+        if (isReversed) {
+            x = (float) -Math.toDegrees(Math.atan2(-gravityVector[0], -gravityVector[2]));
+            y = (float) -Math.toDegrees(Math.atan2(-gravityVector[1], -gravityVector[2]));
+        } else {
+            x = (float) -Math.toDegrees(Math.atan2(gravityVector[0], gravityVector[2]));
+            y = (float) Math.toDegrees(Math.atan2(gravityVector[1], gravityVector[2]));
+        }
+
+        if (x < -180.0f) x += 360.0f;
+        else if (x > 180.0f) x -= 360.0f;
+
+        if (y < -180.0f) y += 360.0f;
+        else if (x > 180.0f) x -= 360.0f;
+
+        if (shouldCalibrate) {
+            shouldCalibrate = false;
+            calibrate();
+        }
+
+        x -= modX;
+        y -= modY;
 
         if (gyroscopeReaderInterface != null) gyroscopeReaderInterface.receivedValues(x, y);
+    }
+
+    public void setEnabled(boolean b, boolean cal) {
+        shouldCalibrate = cal;
+        setEnabled(b);
     }
 
     public void setEnabled(boolean b) {

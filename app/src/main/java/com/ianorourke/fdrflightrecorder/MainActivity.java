@@ -5,10 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ListView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -21,7 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MainActivity extends FragmentActivity implements MapReceiver.MapDataInterface {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    protected Marker mLocationMarker;
+    private Marker mLocationMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
