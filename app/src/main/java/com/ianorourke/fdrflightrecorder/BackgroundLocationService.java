@@ -203,7 +203,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     }
 
     @Override
-    public void receivedValues(float x, float y) {
+    public void receivedGyroValues(float x, float y) {
         fdrFormatter.setRoll(x);
         fdrFormatter.setPitch(y);
 

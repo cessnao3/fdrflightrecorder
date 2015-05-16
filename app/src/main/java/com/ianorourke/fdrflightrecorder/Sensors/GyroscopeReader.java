@@ -20,7 +20,7 @@ public class GyroscopeReader implements SensorEventListener {
     private boolean isReversed = false;
 
     public interface GyroscopeReaderInterface {
-        public void receivedValues(float x, float y);
+        void receivedGyroValues(float x, float y);
     }
 
     private GyroscopeReaderInterface gyroscopeReaderInterface;
@@ -78,7 +78,7 @@ public class GyroscopeReader implements SensorEventListener {
         x -= modX;
         y -= modY;
 
-        if (gyroscopeReaderInterface != null) gyroscopeReaderInterface.receivedValues(x, y);
+        if (gyroscopeReaderInterface != null) gyroscopeReaderInterface.receivedGyroValues(x, y);
     }
 
     public void setEnabled(boolean b, boolean cal) {
