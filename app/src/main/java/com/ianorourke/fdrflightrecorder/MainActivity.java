@@ -15,11 +15,22 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
-public class MainActivity extends FragmentActivity implements MapReceiver.MapDataInterface {
+import java.util.ArrayList;
+
+public class MainActivity extends FragmentActivity implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
+    //http://developer.android.com/guide/topics/data/data-storage.html
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
     private Marker mLocationMarker;
+    private Polyline mPolyLine;
+
+    private static ArrayList<LatLng> markerPoints = new ArrayList<>();
+
+    private Button startStopButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +39,10 @@ public class MainActivity extends FragmentActivity implements MapReceiver.MapDat
         setUpMapIfNeeded();
 
         MapReceiver.dataInterface = this;
+
+        BackgroundLocationService.serviceInterface = this;
+
+        startStopButton = (Button) findViewById(R.id.button_start_stop);
     }
 
     @Override
@@ -36,21 +51,6 @@ public class MainActivity extends FragmentActivity implements MapReceiver.MapDat
         setUpMapIfNeeded();
     }
 
-    /**
-     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p/>
-     * If it isn't installed {@link SupportMapFragment} (and
-     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
-     * install/update the Google Play services APK on their device.
-     * <p/>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
-     */
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
@@ -64,45 +64,66 @@ public class MainActivity extends FragmentActivity implements MapReceiver.MapDat
         }
     }
 
-    /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p/>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
-     */
     private void setUpMap() {
-        //mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(34.738, -92.894), 4.0f));
     }
 
     public void onStartStopClick(View v) {
-        Button button = (Button) v;
-
         Intent serviceIntent = new Intent(getApplicationContext(), BackgroundLocationService.class);
         serviceIntent.putExtra(getString(R.string.service_soundstart), ((CheckBox) findViewById(R.id.checkbox_sound_start)).isChecked());
+        serviceIntent.putExtra(getString(R.string.service_soundstop), ((CheckBox) findViewById(R.id.checkbox_sound_stop)).isChecked());
 
-        if (!BackgroundLocationService.isRunning()) {
-            getApplicationContext().startService(serviceIntent);
-            button.setText("Stop Service");
-            Log.v("FDR", "Service Started");
-        } else {
+        if (BackgroundLocationService.isRunning()) {
             stopService(serviceIntent);
-            button.setText("Start Service");
-            Log.v("FDR", "Service Stopped");
+        } else {
+            markerPoints.clear();
+
+            if (mLocationMarker != null) mLocationMarker.remove();
+            mLocationMarker = null;
+
+            if (mPolyLine != null) mPolyLine.remove();
+            mPolyLine = null;
+
+            startService(serviceIntent);
         }
+
+        startStopButton.setEnabled(false);
+    }
+
+    @Override
+    public void backgroundServiceStarted() {
+        startStopButton.setText("Stop Service");
+        startStopButton.setEnabled(true);
+    }
+
+    @Override
+    public void backgroundServiceStopped() {
+        startStopButton.setText("Start Service");
+        startStopButton.setEnabled(true);
     }
 
     public void onLocationReceive(double lat, double lon) {
+        LatLng currentLocation = new LatLng(lat, lon);
+
         if (mMap != null) {
             CameraUpdate cameraUpdate;
 
             if (mLocationMarker == null) {
-                mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Location").position(new LatLng(lat, lon)));
+                mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Location").position(currentLocation).draggable(false));
                 cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), 12.0f);
                 mMap.moveCamera(cameraUpdate);
             } else {
                 mLocationMarker.setPosition(new LatLng(lat, lon));
                 cameraUpdate = CameraUpdateFactory.newLatLng(mLocationMarker.getPosition());
                 mMap.animateCamera(cameraUpdate);
+            }
+
+            markerPoints.add(currentLocation);
+
+            if (mPolyLine == null) {
+                mPolyLine = mMap.addPolyline(new PolylineOptions().addAll(markerPoints).width(12.0f));
+            } else {
+                mPolyLine.setPoints(markerPoints);
             }
         }
     }

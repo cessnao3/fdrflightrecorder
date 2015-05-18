@@ -57,6 +57,13 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         return mBinder;
     }
 
+    public interface BackgroundLocationServiceInterface {
+        void backgroundServiceStarted();
+        void backgroundServiceStopped();
+    }
+
+    public static BackgroundLocationServiceInterface serviceInterface;
+
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest locationRequest;
 
@@ -70,7 +77,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private boolean isStarted = false;
 
     private SoundStart soundStart;
-    private int MIN_AMPLITUDE = 15000;
+    private int MIN_AMPLITUDE = 5000;//15000; TODO: FIX THIS!!!
     private int NUM_HOLD_SECONDS = 5;
 
     private FDRLog fdrLog;
@@ -88,6 +95,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private String filename;
 
     private boolean soundStartEnabled;
+    private boolean soundStopEnabled;
 
     @Override
     public void onCreate() {
@@ -116,6 +124,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         super.onStartCommand(intent, flags, startId);
 
         soundStartEnabled = intent.getBooleanExtra(getString(R.string.service_soundstart), false);
+        soundStopEnabled = intent.getBooleanExtra(getString(R.string.service_soundstop), false);
 
         // Checking if Null
         if (mGoogleApiClient == null) Log.v("FDR", "Google API Client Null");
@@ -161,15 +170,21 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         running = true;
 
         if (soundStartEnabled)
-            soundStart.triggerSoundStart();
+            soundStart.triggerSoundStart(soundStopEnabled);
         else
             startLog();
+
+        if (serviceInterface != null) serviceInterface.backgroundServiceStarted();
 
         return START_STICKY;
     }
 
     public void onSoundStartSuccess() {
         startLog();
+    }
+
+    public void onSoundStopSuccess() {
+        stopSelf();
     }
 
     private void startLog() {
@@ -207,7 +222,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         fdrFormatter.setRoll(x);
         fdrFormatter.setPitch(y);
 
-        Log.v("FDR", "Roll: " + x + ", Pitch: " + y);
+        //Log.v("FDR", "Roll: " + x + ", Pitch: " + y);
     }
 
     @Override
@@ -274,6 +289,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         running = false;
         isStarted = false;
+
+        soundStart.cancelAll();
+
+        if (serviceInterface != null) serviceInterface.backgroundServiceStopped();
 
         try {
             File file = new File(Environment.getExternalStorageDirectory(), filename);

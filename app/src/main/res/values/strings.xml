@@ -10,4 +10,11 @@
 
     <string name="service_wakelock">map_service_wake_lock</string>
     <string name="service_soundstart">service_sound_start</string>
+    <string name="service_soundstop">service_sound_stop</string>
+
+    <string name="prefs_app">PrefsApp</string>
+    <string name="prefs_aircraft">PrefsAircraft</string>
+    <string name="prefs_pilots">PrefsPilots</string>
+
+    <string name="save_folder">Flight Recorder</string>
 </resources>

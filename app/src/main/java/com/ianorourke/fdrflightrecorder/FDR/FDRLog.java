@@ -39,4 +39,8 @@ public class FDRLog {
     public String getLog() {
         return logBuffer.toString();
     }
+
+    public StringBuilder getBuffer() {
+        return logBuffer;
+    }
 }
