@@ -12,10 +12,8 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
@@ -31,10 +29,18 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <receiver android:name=".Receivers.MapReceiver" >
+            <intent-filter>
+                <action android:name="com.ianorourke.MAP_LOCATION" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".Services.BackgroundLocationService" />
+
         <activity
-            android:name=".Activities.MapActivity"
-            android:launchMode="singleInstance"
-            android:label="@string/title_activity_main">
+            android:name=".MainActivity"
+            android:label="Main Activity"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -42,13 +48,11 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".Activities.MapReceiver">
-            <intent-filter>
-                <action android:name="com.ianorourke.MAP_LOCATION" />
-            </intent-filter>
-        </receiver>
-
-        <service android:name=".Services.BackgroundLocationService"></service>
+        <activity
+            android:name=".MapActivity"
+            android:label="@string/title_activity_main"
+            android:launchMode="singleInstance" >
+        </activity>
     </application>
 
 </manifest>

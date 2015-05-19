@@ -21,7 +21,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.ianorourke.fdrflightrecorder.Activities.MapActivity;
+import com.ianorourke.fdrflightrecorder.MapActivity;
 import com.ianorourke.fdrflightrecorder.FDR.FDRFormatter;
 import com.ianorourke.fdrflightrecorder.FDR.FDRLog;
 import com.ianorourke.fdrflightrecorder.R;
@@ -79,7 +79,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private boolean isStarted = false;
 
     private SoundStart soundStart;
-    private int MIN_AMPLITUDE = 5000;//15000; TODO: FIX THIS!!!
+    private int MIN_AMPLITUDE = 15000;
     private int NUM_HOLD_SECONDS = 5;
 
     private FDRLog fdrLog;

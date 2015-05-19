@@ -1,4 +1,4 @@
-package com.ianorourke.fdrflightrecorder.Activities;
+package com.ianorourke.fdrflightrecorder.Receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.ianorourke.fdrflightrecorder.R;
 
 /**

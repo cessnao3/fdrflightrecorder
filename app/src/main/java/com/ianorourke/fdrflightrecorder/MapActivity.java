@@ -1,9 +1,11 @@
-package com.ianorourke.fdrflightrecorder.Activities;
+package com.ianorourke.fdrflightrecorder;
 
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 
@@ -16,12 +18,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.ianorourke.fdrflightrecorder.Receivers.MapReceiver;
 import com.ianorourke.fdrflightrecorder.Services.BackgroundLocationService;
-import com.ianorourke.fdrflightrecorder.R;
 
 import java.util.ArrayList;
 
-public class MapActivity extends FragmentActivity implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
+public class MapActivity extends Fragment implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
     //http://developer.android.com/guide/topics/data/data-storage.html
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -34,20 +36,49 @@ public class MapActivity extends FragmentActivity implements MapReceiver.MapData
     private Button startStopButton;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
+
+        View v = inflater.inflate(R.layout.fragment_map, container, false);
+        //setContentView(R.layout.fragment_map);
+
         setUpMapIfNeeded();
 
         MapReceiver.dataInterface = this;
 
         BackgroundLocationService.serviceInterface = this;
 
-        startStopButton = (Button) findViewById(R.id.button_start_stop);
+        startStopButton = (Button) v.findViewById(R.id.button_start_stop);
+        startStopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent serviceIntent = new Intent(getActivity(), BackgroundLocationService.class);
+                serviceIntent.putExtra(getString(R.string.service_soundstart), ((CheckBox) getView().findViewById(R.id.checkbox_sound_start)).isChecked());
+                serviceIntent.putExtra(getString(R.string.service_soundstop), ((CheckBox) getView().findViewById(R.id.checkbox_sound_stop)).isChecked());
+
+                if (BackgroundLocationService.isRunning()) {
+                    getActivity().stopService(serviceIntent);
+                } else {
+                    markerPoints.clear();
+
+                    if (mLocationMarker != null) mLocationMarker.remove();
+                    mLocationMarker = null;
+
+                    if (mPolyLine != null) mPolyLine.remove();
+                    mPolyLine = null;
+
+                    getActivity().startService(serviceIntent);
+                }
+
+                startStopButton.setEnabled(false);
+            }
+        });
+
+        return v;
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         setUpMapIfNeeded();
     }
@@ -56,7 +87,7 @@ public class MapActivity extends FragmentActivity implements MapReceiver.MapData
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+            mMap = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map))
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
@@ -67,28 +98,6 @@ public class MapActivity extends FragmentActivity implements MapReceiver.MapData
 
     private void setUpMap() {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(34.738, -92.894), 4.0f));
-    }
-
-    public void onStartStopClick(View v) {
-        Intent serviceIntent = new Intent(getApplicationContext(), BackgroundLocationService.class);
-        serviceIntent.putExtra(getString(R.string.service_soundstart), ((CheckBox) findViewById(R.id.checkbox_sound_start)).isChecked());
-        serviceIntent.putExtra(getString(R.string.service_soundstop), ((CheckBox) findViewById(R.id.checkbox_sound_stop)).isChecked());
-
-        if (BackgroundLocationService.isRunning()) {
-            stopService(serviceIntent);
-        } else {
-            markerPoints.clear();
-
-            if (mLocationMarker != null) mLocationMarker.remove();
-            mLocationMarker = null;
-
-            if (mPolyLine != null) mPolyLine.remove();
-            mPolyLine = null;
-
-            startService(serviceIntent);
-        }
-
-        startStopButton.setEnabled(false);
     }
 
     @Override

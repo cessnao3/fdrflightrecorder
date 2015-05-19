@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="navigation_actions">
+        <item>Pilots</item>
+        <item>Aircraft</item>
+        <item>Weather</item>
+        <item>Record Flight</item>
+    </string-array>
+
+    <integer name="nav_pilots">0</integer>
+    <integer name="nav_aircraft">1</integer>
+    <integer name="nav_weather">2</integer>
+    <integer name="nav_record">3</integer>
+</resources>
