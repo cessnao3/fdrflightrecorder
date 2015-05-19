@@ -1,9 +1,8 @@
-package com.ianorourke.fdrflightrecorder;
+package com.ianorourke.fdrflightrecorder.Activities;
 
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -17,10 +16,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.ianorourke.fdrflightrecorder.Services.BackgroundLocationService;
+import com.ianorourke.fdrflightrecorder.R;
 
 import java.util.ArrayList;
 
-public class MainActivity extends FragmentActivity implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
+public class MapActivity extends FragmentActivity implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
     //http://developer.android.com/guide/topics/data/data-storage.html
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -35,7 +36,7 @@ public class MainActivity extends FragmentActivity implements MapReceiver.MapDat
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_map);
         setUpMapIfNeeded();
 
         MapReceiver.dataInterface = this;

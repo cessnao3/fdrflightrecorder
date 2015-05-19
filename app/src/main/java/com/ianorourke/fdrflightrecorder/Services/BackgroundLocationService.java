@@ -1,4 +1,4 @@
-package com.ianorourke.fdrflightrecorder;
+package com.ianorourke.fdrflightrecorder.Services;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -21,8 +21,10 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.ianorourke.fdrflightrecorder.Activities.MapActivity;
 import com.ianorourke.fdrflightrecorder.FDR.FDRFormatter;
 import com.ianorourke.fdrflightrecorder.FDR.FDRLog;
+import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
 import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
 
@@ -143,7 +145,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         wakeLock.acquire();
 
         // Notification
-        Intent viewIntent = new Intent(this, MainActivity.class);
+        Intent viewIntent = new Intent(this, MapActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
 
         notificationBuilder = new Notification.Builder(getApplicationContext());

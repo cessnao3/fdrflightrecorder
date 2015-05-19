@@ -32,7 +32,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities.MapActivity"
             android:launchMode="singleInstance"
             android:label="@string/title_activity_main">
             <intent-filter>
@@ -42,13 +42,13 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".MapReceiver">
+        <receiver android:name=".Activities.MapReceiver">
             <intent-filter>
                 <action android:name="com.ianorourke.MAP_LOCATION" />
             </intent-filter>
         </receiver>
 
-        <service android:name=".BackgroundLocationService"></service>
+        <service android:name=".Services.BackgroundLocationService"></service>
     </application>
 
 </manifest>
