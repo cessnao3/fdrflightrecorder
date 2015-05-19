@@ -1,10 +1,12 @@
 package com.ianorourke.fdrflightrecorder;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void addDrawerItems() {
         mNavigationActions = getResources().getStringArray(R.array.navigation_actions);
+        Log.v("FDR", mNavigationActions[getResources().getInteger(R.integer.nav_aircraft)]);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -42,13 +45,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 parent.getOnItemClickListener();
-                Toast.makeText(MainActivity.this, "Position: " + position + ", " + mNavigationActions[position], Toast.LENGTH_SHORT).show();;
+                Toast.makeText(MainActivity.this, "Position: " + position + ", " + mNavigationActions[position], Toast.LENGTH_SHORT).show();
+
+                if (position == getResources().getInteger(R.integer.nav_new))
+                    startActivity(new Intent(MainActivity.this, MapActivity.class));
             }
         });
     }
 
     private void setupDrawer() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);

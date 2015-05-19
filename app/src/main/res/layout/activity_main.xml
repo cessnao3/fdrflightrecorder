@@ -6,19 +6,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/main_relative_layout">
+
+    </RelativeLayout>
+
     <ListView
         android:id="@+id/left_drawer"
         android:layout_width="200dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="#ffeeeeee"/>
-
-    <fragment
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:name="com.ianorourke.fdrflightrecorder.MapActivity"
-        android:id="@+id/fragment"
-        tools:layout="@layout/fragment_map" />
-
 
 </android.support.v4.widget.DrawerLayout>

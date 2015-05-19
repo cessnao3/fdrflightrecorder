@@ -60,8 +60,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     }
 
     public interface BackgroundLocationServiceInterface {
-        void backgroundServiceStarted();
-        void backgroundServiceStopped();
+        void backgroundServiceChanged();
     }
 
     public static BackgroundLocationServiceInterface serviceInterface;
@@ -176,7 +175,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         else
             startLog();
 
-        if (serviceInterface != null) serviceInterface.backgroundServiceStarted();
+        if (serviceInterface != null) serviceInterface.backgroundServiceChanged();
 
         return START_STICKY;
     }
@@ -294,7 +293,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         soundStart.cancelAll();
 
-        if (serviceInterface != null) serviceInterface.backgroundServiceStopped();
+        if (serviceInterface != null) serviceInterface.backgroundServiceChanged();
 
         try {
             File file = new File(Environment.getExternalStorageDirectory(), filename);

@@ -1,11 +1,14 @@
 package com.ianorourke.fdrflightrecorder;
 
+import android.app.Activity;
+import android.app.TaskStackBuilder;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 
@@ -23,7 +26,7 @@ import com.ianorourke.fdrflightrecorder.Services.BackgroundLocationService;
 
 import java.util.ArrayList;
 
-public class MapActivity extends Fragment implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
+public class MapActivity extends AppCompatActivity implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
     //http://developer.android.com/guide/topics/data/data-storage.html
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -36,11 +39,10 @@ public class MapActivity extends Fragment implements MapReceiver.MapDataInterfac
     private Button startStopButton;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        View v = inflater.inflate(R.layout.fragment_map, container, false);
-        //setContentView(R.layout.fragment_map);
+        setContentView(R.layout.activity_map);
 
         setUpMapIfNeeded();
 
@@ -48,33 +50,9 @@ public class MapActivity extends Fragment implements MapReceiver.MapDataInterfac
 
         BackgroundLocationService.serviceInterface = this;
 
-        startStopButton = (Button) v.findViewById(R.id.button_start_stop);
-        startStopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent serviceIntent = new Intent(getActivity(), BackgroundLocationService.class);
-                serviceIntent.putExtra(getString(R.string.service_soundstart), ((CheckBox) getView().findViewById(R.id.checkbox_sound_start)).isChecked());
-                serviceIntent.putExtra(getString(R.string.service_soundstop), ((CheckBox) getView().findViewById(R.id.checkbox_sound_stop)).isChecked());
+        startStopButton = (Button) findViewById(R.id.button_start_stop);
 
-                if (BackgroundLocationService.isRunning()) {
-                    getActivity().stopService(serviceIntent);
-                } else {
-                    markerPoints.clear();
-
-                    if (mLocationMarker != null) mLocationMarker.remove();
-                    mLocationMarker = null;
-
-                    if (mPolyLine != null) mPolyLine.remove();
-                    mPolyLine = null;
-
-                    getActivity().startService(serviceIntent);
-                }
-
-                startStopButton.setEnabled(false);
-            }
-        });
-
-        return v;
+        backgroundServiceChanged();
     }
 
     @Override
@@ -82,13 +60,39 @@ public class MapActivity extends Fragment implements MapReceiver.MapDataInterfac
         super.onResume();
         setUpMapIfNeeded();
     }
+    /*
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case android.R.id.home:
+                Intent upIntent = NavUtils.getParentActivityIntent(this);
+                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+                    // This activity is NOT part of this app's task, so create a new task
+                    // when navigating up, with a synthesized back stack.
+                    TaskStackBuilder.create(this)
+                            // Add all of this activity's parents to the back stack
+                            .addNextIntentWithParentStack(upIntent)
+                                    // Navigate up to the closest parent
+                            .startActivities();
+                } else {
+                    // This activity is part of this app's task, so simply
+                    // navigate up to the logical parent activity.
+                    NavUtils.navigateUpTo(this, upIntent);
+                }
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }*/
 
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 setUpMap();
@@ -100,15 +104,35 @@ public class MapActivity extends Fragment implements MapReceiver.MapDataInterfac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(34.738, -92.894), 4.0f));
     }
 
-    @Override
-    public void backgroundServiceStarted() {
-        startStopButton.setText("Stop Service");
-        startStopButton.setEnabled(true);
+    public void startStopButtonPressed(View v) {
+        Intent serviceIntent = new Intent(this, BackgroundLocationService.class);
+        serviceIntent.putExtra(getString(R.string.service_soundstart), ((CheckBox) findViewById(R.id.checkbox_sound_start)).isChecked());
+        serviceIntent.putExtra(getString(R.string.service_soundstop), ((CheckBox) findViewById(R.id.checkbox_sound_stop)).isChecked());
+
+        if (BackgroundLocationService.isRunning()) {
+            stopService(serviceIntent);
+        } else {
+            markerPoints.clear();
+
+            if (mLocationMarker != null) mLocationMarker.remove();
+            mLocationMarker = null;
+
+            if (mPolyLine != null) mPolyLine.remove();
+            mPolyLine = null;
+
+            startService(serviceIntent);
+        }
+
+        startStopButton.setEnabled(false);
     }
 
     @Override
-    public void backgroundServiceStopped() {
-        startStopButton.setText("Start Service");
+    public void backgroundServiceChanged() {
+        if (BackgroundLocationService.isRunning())
+            startStopButton.setText("Stop Service");
+        else
+            startStopButton.setText("Start Service");
+
         startStopButton.setEnabled(true);
     }
 
