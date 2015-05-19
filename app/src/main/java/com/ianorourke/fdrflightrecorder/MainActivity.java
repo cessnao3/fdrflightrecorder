@@ -1,5 +1,8 @@
 package com.ianorourke.fdrflightrecorder;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -20,16 +24,30 @@ public class MainActivity extends AppCompatActivity {
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private LinearLayout mLinearLayout;
+    private Fragment mCurrentFragment;
+
+    private FragmentManager mFragmentManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mLinearLayout = (LinearLayout) findViewById(R.id.main_layout);
+        mFragmentManager = getFragmentManager();
 
         addDrawerItems();
         setupDrawer();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        Log.v("FDR", "Child Count: " + mLinearLayout.getChildCount());
+
+        if (mCurrentFragment == null) {
+            setPosition(getResources().getInteger(R.integer.nav_pilots));
+        }
     }
 
     private void addDrawerItems() {
@@ -44,13 +62,36 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                parent.getOnItemClickListener();
-                Toast.makeText(MainActivity.this, "Position: " + position + ", " + mNavigationActions[position], Toast.LENGTH_SHORT).show();
-
-                if (position == getResources().getInteger(R.integer.nav_new))
-                    startActivity(new Intent(MainActivity.this, MapActivity.class));
+                setPosition(position);
+                mDrawerLayout.closeDrawer(mDrawerList);
             }
         });
+    }
+
+    private void setPosition(int position) {
+        String[] navArray = getResources().getStringArray(R.array.navigation_actions);
+        getSupportActionBar().setTitle(navArray[position]);
+
+        Fragment newFragment = null;
+
+        if (position == getResources().getInteger(R.integer.nav_pilots)) {
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != PilotFragment.class)
+                newFragment = new PilotFragment();
+        } else if (position == getResources().getInteger(R.integer.nav_aircraft)) {
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != AircraftFragment.class)
+                newFragment = new AircraftFragment();
+        }
+
+        if (newFragment != null) {
+            FragmentTransaction ft = mFragmentManager.beginTransaction();
+            ft.replace(mLinearLayout.getId(), newFragment);
+            ft.commit();
+
+            mCurrentFragment = newFragment;
+        }
+
+        if (position == getResources().getInteger(R.integer.nav_new))
+            startActivity(new Intent(MainActivity.this, MapActivity.class));
     }
 
     private void setupDrawer() {
