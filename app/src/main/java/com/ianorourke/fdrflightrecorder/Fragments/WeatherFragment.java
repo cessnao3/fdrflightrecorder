@@ -1,14 +1,16 @@
-package com.ianorourke.fdrflightrecorder;
+package com.ianorourke.fdrflightrecorder.Fragments;
 
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class AircraftFragment extends Fragment {
+import com.ianorourke.fdrflightrecorder.R;
 
-    public AircraftFragment() {
+public class WeatherFragment extends Fragment {
+
+    public WeatherFragment() {
         // Required empty public constructor
     }
 
@@ -21,6 +23,6 @@ public class AircraftFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_aircraft, container, false);
+        return inflater.inflate(R.layout.fragment_weather, container, false);
     }
 }

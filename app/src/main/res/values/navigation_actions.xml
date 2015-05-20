@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="navigation_actions">
-        <item>Pilots</item>
         <item>Aircraft</item>
         <item>Weather</item>
-        <item>New Flight</item>
         <item>Recorded Flights</item>
+        <item>New Flight</item>
+        <item>Settings</item>
     </string-array>
 
-    <integer name="nav_pilots">0</integer>
-    <integer name="nav_aircraft">1</integer>
-    <integer name="nav_weather">2</integer>
+    <integer name="nav_aircraft">0</integer>
+    <integer name="nav_weather">1</integer>
+    <integer name="nav_recorded">2</integer>
     <integer name="nav_new">3</integer>
-    <integer name="nav_recorded">4</integer>
+    <integer name="nav_settings">4</integer>
 </resources>

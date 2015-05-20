@@ -16,7 +16,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import com.ianorourke.fdrflightrecorder.Fragments.AircraftFragment;
+import com.ianorourke.fdrflightrecorder.Fragments.WeatherFragment;
 
 public class MainActivity extends AppCompatActivity {
     private String[] mNavigationActions;
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         Log.v("FDR", "Child Count: " + mLinearLayout.getChildCount());
 
         if (mCurrentFragment == null)
-            setPosition(getResources().getInteger(R.integer.nav_pilots));
+            setPosition(getResources().getInteger(R.integer.nav_weather));
     }
 
     private void addDrawerItems() {
@@ -73,12 +75,12 @@ public class MainActivity extends AppCompatActivity {
 
         Fragment newFragment = null;
 
-        if (position == getResources().getInteger(R.integer.nav_pilots)) {
-            if (mCurrentFragment == null || mCurrentFragment.getClass() != PilotFragment.class)
-                newFragment = new PilotFragment();
-        } else if (position == getResources().getInteger(R.integer.nav_aircraft)) {
+        if (position == getResources().getInteger(R.integer.nav_aircraft)) {
             if (mCurrentFragment == null || mCurrentFragment.getClass() != AircraftFragment.class)
                 newFragment = new AircraftFragment();
+        } else if (position == getResources().getInteger(R.integer.nav_weather)) {
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != WeatherFragment.class)
+                newFragment = new WeatherFragment();
         }
 
         if (newFragment != null) {
