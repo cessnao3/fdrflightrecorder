@@ -236,7 +236,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         fdrFormatter.setLon(currentLoc.longitude);
         fdrFormatter.setAltitude((int) (location.getAltitude() * METERS_TO_FEET));
         fdrFormatter.setHeading((int) location.getBearing());
-        fdrFormatter.setAirspeed(location.getSpeed() * MS_TO_KNOTS);
 
         float accuracy = location.getAccuracy() * METERS_TO_FEET;
 
@@ -258,13 +257,13 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public void onConnectionSuspended(int i) {
         if (mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-            Toast.makeText(this, "Connection Suspended: " + i, Toast.LENGTH_LONG);
+            Toast.makeText(this, "Connection Suspended: " + i, Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(this, "Connection Failed: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG);
+        Toast.makeText(this, "Connection Failed: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG).show();
     }
 
     private File getFile(String filename) {

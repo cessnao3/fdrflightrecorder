@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import java.util.ArrayList;
+
 public class PilotFragment extends Fragment {
 
     private Spinner mNameSpinner;
@@ -49,13 +51,11 @@ public class PilotFragment extends Fragment {
     }
 
     public void setPilotNames() {
-        String[] pilotArray = FlightSettings.getPilots(getActivity());
-        if (pilotArray.length == 0) {
-            pilotArray = new String[1];
-            pilotArray[0] = "Please Enter Pilot Name Below";
-        }
+        ArrayList<String> pilots = FlightSettings.getPilots(getActivity());
+        if (pilots.size() == 0)
+            pilots.add("Please Enter Pilot Name Below");
 
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, pilotArray);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, pilots);
         mNameSpinner.setAdapter(spinnerAdapter);
     }
 }

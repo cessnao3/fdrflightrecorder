@@ -16,16 +16,10 @@ public class FDRFormatter {
     double pitch = 0.0;
     double roll = 0.0;
 
-    double airspeed = 0.0;
-
     double pressure = 29.92;
 
     public void setSeconds(int s) {
         seconds = s;
-    }
-
-    public void setTemp(double _temp) {
-        temp = _temp;
     }
 
     public void setLon(double _lon) {
@@ -50,14 +44,6 @@ public class FDRFormatter {
 
     public void setRoll(double _roll) {
         roll = _roll;
-    }
-
-    public void setAirspeed(double _airspeed) {
-        airspeed = _airspeed;
-    }
-
-    public void setPressure(double _pressure) {
-        pressure = _pressure;
     }
 
     public String getData() {
@@ -93,11 +79,8 @@ public class FDRFormatter {
         builder.append(heading);
         builder.append(',');
 
-        builder.append(airspeed);
-        builder.append(',');
-
         //Rates
-        builder.append("0,0,0,0,0,0,0,0,0,0,");
+        builder.append("0,0,0,0,0,0,0,0,0,0,0,");
 
         //Landing Gear - Down
         builder.append("1,1,1,1,");
