@@ -93,8 +93,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private final float METERS_TO_FEET = 3.28f;
     private final float MS_TO_KNOTS = 1.94384f;
 
-    private String filename;
-
     private boolean soundStartEnabled;
     private boolean soundStopEnabled;
 
@@ -116,8 +114,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         gyroscopeReader = new GyroscopeReader(this);
         gyroscopeReader.setInterface(this);
-
-        soundStart = new SoundStart(MIN_AMPLITUDE, NUM_HOLD_SECONDS, this);
     }
 
     @Override
@@ -126,6 +122,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         soundStartEnabled = intent.getBooleanExtra(getString(R.string.service_soundstart), false);
         soundStopEnabled = intent.getBooleanExtra(getString(R.string.service_soundstop), false);
+
+        soundStart = new SoundStart(MIN_AMPLITUDE, NUM_HOLD_SECONDS, this);
 
         // Checking if Null
         if (mGoogleApiClient == null) Log.v("FDR", "Google API Client Null");
@@ -158,9 +156,9 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         // Creating File and Log
         Calendar c = GregorianCalendar.getInstance();
-        filename = (new SimpleDateFormat("MM-dd-yyyy HH-mm-ss")).format(c.getTime()) + getString(R.string.file_ext);
+        String filename = (new SimpleDateFormat("MM-dd-yyyy HH-mm-ss")).format(c.getTime()) + getString(R.string.save_file_ext);
 
-        fdrLog = new FDRLog(c, null, null, null, null);
+        fdrLog = new FDRLog(c, null, null, null, null, getFile(filename));
 
         fdrFormatter = new FDRFormatter();
         fdrFormatter.setSeconds(0);
@@ -269,6 +267,23 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         Toast.makeText(this, "Connection Failed: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG);
     }
 
+    private File getFile(String filename) {
+        File folderFile = new File(Environment.getExternalStorageDirectory(), getString(R.string.save_folder));
+        if (!folderFile.exists()) folderFile.mkdir();
+
+        File file = new File(folderFile, filename);
+
+        boolean success = false;
+
+        try {
+            if (!file.exists()) success = file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return (success) ? file : null;
+    }
+
     @Override
     public void onDestroy() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -295,26 +310,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         if (serviceInterface != null) serviceInterface.backgroundServiceChanged();
 
-        try {
-            File file = new File(Environment.getExternalStorageDirectory(), filename);
-
-            boolean success = true;
-            if (!file.exists()) success = file.createNewFile();
-
-            if (success) {
-                FileWriter fileWriter = new FileWriter(file, false);
-
-                fileWriter.write(fdrLog.getLog());
-
-                fileWriter.flush();
-                fileWriter.close();
-
-                Log.v("FDR", "File Saved: " + filename);
-            }
-        } catch (IOException e) {
-            Log.v("FDR", e.toString());
-            e.printStackTrace();
-        }
+        fdrLog.close();
+        Log.v("FDR", "File Saved");
 
         super.onDestroy();
 

@@ -8,7 +8,8 @@
     <string name="map_lat">LAT</string>
     <string name="map_lon">LON</string>
 
-    <string name="file_ext">.fdr</string>
+    <string name="save_folder">Flight Recorder</string>
+    <string name="save_file_ext">.fdr</string>
 
     <string name="service_wakelock">map_service_wake_lock</string>
     <string name="service_soundstart">service_sound_start</string>
@@ -16,13 +17,11 @@
 
     <string name="prefs_app">PrefsApp</string>
     <string name="prefs_aircraft">PrefsAircraft</string>
-    <string name="prefs_pilots">PrefsPilots</string>
 
-    <string name="save_folder">Flight Recorder</string>
+    <string name="prefs_pilots">PrefsPilots</string>
+    <string name="prefs_pilots_current">PrefsPilotsCurrent</string>
+    <string name="prefs_pilots_all">PrefsPilotsAll</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

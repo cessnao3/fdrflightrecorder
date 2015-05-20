@@ -1,5 +1,8 @@
 package com.ianorourke.fdrflightrecorder.FDR;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -8,6 +11,9 @@ import java.util.Calendar;
  */
 public class FDRLog {
     StringBuilder logBuffer;
+
+    FileWriter fileWriter;
+    File file;
 
     public FDRLog(Calendar time, String aircraft, String tail, String pressure, String temp) {
         logBuffer = new StringBuilder();
@@ -32,15 +38,44 @@ public class FDRLog {
         logBuffer.append('\n');
     }
 
+    public FDRLog(Calendar time, String aircraft, String tail, String pressure, String temp, File file) {
+        this(time, aircraft, tail, pressure, temp);
+        this.file = file;
+
+        try {
+            fileWriter = new FileWriter(file);
+            fileWriter.write(logBuffer.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void appendData(FDRFormatter logFile) {
         logBuffer.append(logFile.getData());
+
+        if (fileWriter != null) {
+            try {
+                fileWriter.write(logFile.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public String getLog() {
         return logBuffer.toString();
     }
 
-    public StringBuilder getBuffer() {
-        return logBuffer;
+    public void close() {
+        if (fileWriter != null) {
+            try {
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        fileWriter = null;
     }
 }
