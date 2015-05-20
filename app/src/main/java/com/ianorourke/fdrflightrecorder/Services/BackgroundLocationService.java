@@ -21,9 +21,10 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
+import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 import com.ianorourke.fdrflightrecorder.MapActivity;
-import com.ianorourke.fdrflightrecorder.FDR.FDRFormatter;
-import com.ianorourke.fdrflightrecorder.FDR.FDRLog;
+import com.ianorourke.fdrflightrecorder.FlightFormatters.FDRFormatter;
 import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
 import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
@@ -31,7 +32,6 @@ import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Timer;
@@ -81,17 +81,18 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private int MIN_AMPLITUDE = 15000;
     private int NUM_HOLD_SECONDS = 5;
 
-    private FDRLog fdrLog;
     private FDRFormatter fdrFormatter;
 
+    private FlightDataLog flightLog;
+    private FlightDataEvent flightEvent;
+
     private Timer updateTimer;
-    private int timeInterval = 1000;
+    private int timeInterval = 250;
 
     private long startTime = 0;
 
     private final int NOTIFICATION_ID = 101;
     private final float METERS_TO_FEET = 3.28f;
-    private final float MS_TO_KNOTS = 1.94384f;
 
     private boolean soundStartEnabled;
     private boolean soundStopEnabled;
@@ -156,12 +157,11 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         // Creating File and Log
         Calendar c = GregorianCalendar.getInstance();
-        String filename = (new SimpleDateFormat("MM-dd-yyyy HH-mm-ss")).format(c.getTime()) + getString(R.string.save_file_ext);
 
-        fdrLog = new FDRLog(c, null, null, null, null, getFile(filename));
+        flightLog = new FlightDataLog(null, null, null, null, null, c);
+        flightEvent = new FlightDataEvent();
 
-        fdrFormatter = new FDRFormatter();
-        fdrFormatter.setSeconds(0);
+        flightEvent.setSeconds(0);
 
         updateTimer = new Timer(false);
 
@@ -202,10 +202,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 if (currentLoc == null) return;
                 if (startTime == 0) startTime = System.currentTimeMillis();
 
-                int seconds = (int) (System.currentTimeMillis() - startTime) / 1000;
+                double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
 
-                fdrFormatter.setSeconds(seconds);
-                fdrLog.appendData(fdrFormatter);
+                flightEvent.setSeconds(seconds);
+                flightLog.addFlightDataEvent(flightEvent);
 
                 Intent intent = new Intent();
                 intent.setAction(getString(R.string.map_intent));
@@ -218,8 +218,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     @Override
     public void receivedGyroValues(float x, float y) {
-        fdrFormatter.setRoll(x);
-        fdrFormatter.setPitch(y);
+        flightEvent.setRoll(x);
+        flightEvent.setPitch(y);
 
         //Log.v("FDR", "Roll: " + x + ", Pitch: " + y);
     }
@@ -232,10 +232,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         }
         currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
 
-        fdrFormatter.setLat(currentLoc.latitude);
-        fdrFormatter.setLon(currentLoc.longitude);
-        fdrFormatter.setAltitude((int) (location.getAltitude() * METERS_TO_FEET));
-        fdrFormatter.setHeading((int) location.getBearing());
+        flightEvent.setLat(currentLoc.latitude);
+        flightEvent.setLon(currentLoc.longitude);
+        flightEvent.setAltitude((int) (location.getAltitude() * METERS_TO_FEET));
+        flightEvent.setHeading((int) location.getBearing());
 
         float accuracy = location.getAccuracy() * METERS_TO_FEET;
 
@@ -283,6 +283,20 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         return (success) ? file : null;
     }
 
+    private void saveLog() {
+        File saveFile = getFile(flightLog.getFilename() + FDRFormatter.FILE_EXT);
+
+        try {
+            FileWriter fileWriter = new FileWriter(saveFile);
+
+            fileWriter.write(FDRFormatter.formatLog(flightLog));
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onDestroy() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -309,7 +323,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         if (serviceInterface != null) serviceInterface.backgroundServiceChanged();
 
-        fdrLog.close();
+        saveLog();
         Log.v("FDR", "File Saved");
 
         super.onDestroy();

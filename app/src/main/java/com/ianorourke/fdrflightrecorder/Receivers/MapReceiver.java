@@ -13,7 +13,7 @@ import com.ianorourke.fdrflightrecorder.R;
  */
 public class MapReceiver extends BroadcastReceiver {
     public interface MapDataInterface {
-        void onLocationReceive(double lat, double lon);
+        void onLocationReceive(LatLng location);
     }
 
     public static MapDataInterface dataInterface = null;
@@ -23,10 +23,8 @@ public class MapReceiver extends BroadcastReceiver {
         double lat = i.getDoubleExtra(c.getString(R.string.map_lat), 0.0);
         double lon = i.getDoubleExtra(c.getString(R.string.map_lon), 0.0);
 
-        LatLng location = new LatLng(lat, lon);
 
-        Log.v("FDR", location.toString());
 
-        if (dataInterface != null) dataInterface.onLocationReceive(lat, lon);
+        if (dataInterface != null) dataInterface.onLocationReceive(new LatLng(lat, lon));
     }
 }

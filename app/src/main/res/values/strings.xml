@@ -9,7 +9,6 @@
     <string name="map_lon">LON</string>
 
     <string name="save_folder">Flight Recorder</string>
-    <string name="save_file_ext">.fdr</string>
 
     <string name="service_wakelock">map_service_wake_lock</string>
     <string name="service_soundstart">service_sound_start</string>

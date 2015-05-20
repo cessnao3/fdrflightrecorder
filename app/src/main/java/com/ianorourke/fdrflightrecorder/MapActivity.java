@@ -136,23 +136,21 @@ public class MapActivity extends AppCompatActivity implements MapReceiver.MapDat
         startStopButton.setEnabled(true);
     }
 
-    public void onLocationReceive(double lat, double lon) {
-        LatLng currentLocation = new LatLng(lat, lon);
-
+    public void onLocationReceive(LatLng location) {
         if (mMap != null) {
             CameraUpdate cameraUpdate;
 
             if (mLocationMarker == null) {
-                mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Location").position(currentLocation).draggable(false));
+                mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Location").position(location).draggable(false));
                 cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), 12.0f);
                 mMap.moveCamera(cameraUpdate);
             } else {
-                mLocationMarker.setPosition(new LatLng(lat, lon));
+                mLocationMarker.setPosition(location);
                 cameraUpdate = CameraUpdateFactory.newLatLng(mLocationMarker.getPosition());
                 mMap.animateCamera(cameraUpdate);
             }
 
-            markerPoints.add(currentLocation);
+            markerPoints.add(location);
 
             if (mPolyLine == null) {
                 mPolyLine = mMap.addPolyline(new PolylineOptions().addAll(markerPoints).width(12.0f));
