@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         Log.v("FDR", "Child Count: " + mLinearLayout.getChildCount());
 
         if (mCurrentFragment == null)
-            setPosition(getResources().getInteger(R.integer.nav_weather));
+            setPosition(getResources().getInteger(R.integer.nav_aircraft));
     }
 
     private void addDrawerItems() {
