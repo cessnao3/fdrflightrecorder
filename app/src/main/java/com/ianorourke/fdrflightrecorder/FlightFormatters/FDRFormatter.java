@@ -4,6 +4,7 @@ import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /**
  * Created by ian on 5/8/15.
@@ -21,8 +22,14 @@ public class FDRFormatter {
         logBuffer.append("COMM, This FDR File was created by FDR Flight Recorder\n");
         logBuffer.append('\n');
 
-        String formattedDate = (new SimpleDateFormat("MM/dd/yyyy")).format(data.getTime().getTime());
-        String formattedTime = (new SimpleDateFormat("HH:mm:ss")).format(data.getTime().getTime());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+        dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
+        timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String formattedDate = dateFormatter.format(data.getTime().getTime());
+        String formattedTime = timeFormatter.format(data.getTime().getTime());
 
         logBuffer.append("DATE," + formattedDate + ",\n");
         logBuffer.append("TIME," + formattedTime + ",\n");

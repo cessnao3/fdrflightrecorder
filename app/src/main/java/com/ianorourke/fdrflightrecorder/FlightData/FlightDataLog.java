@@ -5,6 +5,7 @@ import com.ianorourke.fdrflightrecorder.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class FlightDataLog {
     String pressure;
@@ -63,6 +64,8 @@ public class FlightDataLog {
     }
 
     public String getFilename() {
-        return (new SimpleDateFormat("MM-dd-yyyy HH-mm-ss")).format(time.getTime());
+        SimpleDateFormat zuluFormatter = new SimpleDateFormat("MM-dd-yyyy HH-mm-ss");
+        zuluFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return zuluFormatter.format(time.getTime());
     }
 }

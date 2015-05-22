@@ -34,6 +34,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -81,13 +82,11 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private int MIN_AMPLITUDE = 15000;
     private int NUM_HOLD_SECONDS = 5;
 
-    private FDRFormatter fdrFormatter;
-
     private FlightDataLog flightLog;
     private FlightDataEvent flightEvent;
 
     private Timer updateTimer;
-    private int timeInterval = 250;
+    private int timeInterval = 500;
 
     private long startTime = 0;
 
@@ -156,9 +155,9 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
         // Creating File and Log
-        Calendar c = GregorianCalendar.getInstance();
+        Calendar zuluTime = GregorianCalendar.getInstance();
 
-        flightLog = new FlightDataLog(null, null, null, null, null, c);
+        flightLog = new FlightDataLog(null, null, null, null, null, zuluTime);
         flightEvent = new FlightDataEvent();
 
         flightEvent.setSeconds(0);
