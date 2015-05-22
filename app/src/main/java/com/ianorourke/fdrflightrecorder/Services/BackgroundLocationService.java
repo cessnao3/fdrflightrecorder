@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
+import com.ianorourke.fdrflightrecorder.FlightData.FlightDatabaseHelper;
 import com.ianorourke.fdrflightrecorder.MapActivity;
 import com.ianorourke.fdrflightrecorder.FlightFormatters.FDRFormatter;
 import com.ianorourke.fdrflightrecorder.R;
@@ -32,9 +33,9 @@ import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -86,7 +87,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private FlightDataEvent flightEvent;
 
     private Timer updateTimer;
-    private int timeInterval = 500;
+    private int timeInterval = 1000;
 
     private long startTime = 0;
 
@@ -96,9 +97,13 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private boolean soundStartEnabled;
     private boolean soundStopEnabled;
 
+    private FlightDatabaseHelper databaseHelper;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        databaseHelper = new FlightDatabaseHelper(this);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -157,7 +162,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         // Creating File and Log
         Calendar zuluTime = GregorianCalendar.getInstance();
 
-        flightLog = new FlightDataLog(null, null, null, null, null, zuluTime);
+        flightLog = new FlightDataLog("Ian", "Cessna 172", "N755PR", "29.92", "14", zuluTime);
         flightEvent = new FlightDataEvent();
 
         flightEvent.setSeconds(0);
@@ -283,7 +288,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     }
 
     private void saveLog() {
-        File saveFile = getFile(flightLog.getFilename() + FDRFormatter.FILE_EXT);
+        File saveFile = getFile(flightLog.getName() + FDRFormatter.FILE_EXT);
 
         try {
             FileWriter fileWriter = new FileWriter(saveFile);
@@ -323,7 +328,18 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         if (serviceInterface != null) serviceInterface.backgroundServiceChanged();
 
         saveLog();
-        Log.v("FDR", "File Saved");
+        Log.v("FDR", "File Saved " + flightLog.getName());
+
+        databaseHelper.addFlight(flightLog);
+
+        ArrayList<FlightDatabaseHelper.FlightRow> rows = new ArrayList<>(databaseHelper.getFlightList());
+
+        Log.v("FDR", "Rows: " + rows.size());
+
+        for (FlightDatabaseHelper.FlightRow r : rows) {
+            Log.v("FDR", r.flight_name);
+        }
+
 
         super.onDestroy();
 

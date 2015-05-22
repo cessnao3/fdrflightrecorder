@@ -63,8 +63,8 @@ public class FlightDataLog {
         dataEvents.add(event.clone());
     }
 
-    public String getFilename() {
-        SimpleDateFormat zuluFormatter = new SimpleDateFormat("MM-dd-yyyy HH-mm-ss");
+    public String getName() {
+        SimpleDateFormat zuluFormatter = new SimpleDateFormat("MM-dd-yyyy-HH-mm-ss");
         zuluFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return zuluFormatter.format(time.getTime());
     }
