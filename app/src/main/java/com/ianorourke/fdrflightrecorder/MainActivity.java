@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.ianorourke.fdrflightrecorder.Fragments.AircraftFragment;
+import com.ianorourke.fdrflightrecorder.Fragments.RecordedFlightsFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.WeatherFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -81,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (position == getResources().getInteger(R.integer.nav_weather)) {
             if (mCurrentFragment == null || mCurrentFragment.getClass() != WeatherFragment.class)
                 newFragment = new WeatherFragment();
+        } else if (position == getResources().getInteger(R.integer.nav_recorded)) {
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != RecordedFlightsFragment.class)
+                newFragment = new RecordedFlightsFragment();
         }
 
         if (newFragment != null) {

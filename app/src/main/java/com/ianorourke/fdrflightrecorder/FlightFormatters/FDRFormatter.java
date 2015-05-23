@@ -6,9 +6,6 @@ import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-/**
- * Created by ian on 5/8/15.
- */
 public class FDRFormatter {
     public final static  String FILE_EXT = ".fdr";
 

@@ -7,24 +7,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
 public class FlightDatabaseHelper extends SQLiteOpenHelper {
-    public class FlightRow {
-        public long _id;
-        public String flight_name;
-        public String pilot;
-        public String plane;
-        public String tail_number;
-        public String pressure;
-        public String temperature;
-    }
-
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy-HH-mm-ss", Locale.US);
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -62,6 +55,8 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
     }
 
     private static class LogTableValues {
+        public static final String TABLE_PREFIX = "Flight";
+
         public static final String ID_COLUMN = "_id";
         public static final String SECONDS_COLUMN = "seconds";
         public static final String LAT_COLUMN = "latitude";
@@ -72,7 +67,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         public static final String ROLL_COLUMN = "roll";
 
         public static String getCreateTable(String name) {
-            return "CREATE TABLE " + name + " ("
+            return "CREATE TABLE " + LogTableValues.TABLE_PREFIX + name + " ("
                     + ID_COLUMN + PRIMARY_KEY + COMMA_SEP
                     + SECONDS_COLUMN + REAL_DT + COMMA_SEP
                     + LAT_COLUMN + REAL_DT + COMMA_SEP
@@ -87,7 +82,16 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
 
     private SQLiteDatabase database;
 
-    public FlightDatabaseHelper(Context context) {
+    private static FlightDatabaseHelper databaseInstance;
+
+    public static FlightDatabaseHelper getInstance(Context c) {
+        if (databaseInstance == null)
+            databaseInstance = new FlightDatabaseHelper(c);
+
+        return databaseInstance;
+    }
+
+    protected FlightDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
         database = this.getWritableDatabase();
@@ -98,19 +102,58 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(FlightTableValues.FLIGHT_TABLE_CREATE);
     }
 
-    public FlightDataLog getFlight(long id) {
-        return null;
-    }
+    public FlightDataLog getFlight(FlightRow flight) {
+        Calendar calendar = GregorianCalendar.getInstance();
 
-    public FlightDataLog getFlight(String name) {
-        return null;
+        try {
+            calendar.setTime(dateFormat.parse(flight.flight_name));
+        } catch (ParseException e) {
+            Log.e("FDR", "Error: " + e.toString());
+        }
+
+        FlightDataLog dataLog = new FlightDataLog(
+                flight.pilot,
+                flight.plane,
+                flight.tail_number,
+                flight.pressure,
+                flight.temperature,
+                calendar);
+
+        Cursor cursor = database.query(LogTableValues.TABLE_PREFIX + flight.flight_name,
+                new String[] {
+                        LogTableValues.SECONDS_COLUMN,
+                        LogTableValues.LAT_COLUMN,
+                        LogTableValues.LON_COLUMN,
+                        LogTableValues.ALT_COLUMN,
+                        LogTableValues.HEADING_COLUMN,
+                        LogTableValues.PITCH_COLUMN,
+                        LogTableValues.ROLL_COLUMN},
+                null, null, null, null, null);
+
+        FlightDataEvent event = new FlightDataEvent();
+
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            event.setSeconds(cursor.getDouble(0));
+            event.setLat(cursor.getDouble(1));
+            event.setLon(cursor.getDouble(2));
+            event.setAltitude(cursor.getInt(3));
+            event.setHeading(cursor.getInt(4));
+            event.setPitch(cursor.getDouble(5));
+            event.setRoll(cursor.getDouble(6));
+
+            dataLog.addFlightDataEvent(event);
+        }
+
+        cursor.close();
+
+        return dataLog;
     }
 
     public List<FlightRow> getFlightList() {
         ArrayList<FlightRow> ret = new ArrayList<>();
 
-        Cursor c = database.query(FlightTableValues.FLIGHT_TABLE,
-                new String[]{
+        Cursor cursor = database.query(FlightTableValues.FLIGHT_TABLE,
+                new String[] {
                         FlightTableValues.ID_COLUMN,
                         FlightTableValues.FLIGHT_COLUMN,
                         FlightTableValues.PILOT_COLUMN,
@@ -120,25 +163,25 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
                         FlightTableValues.TEMPERATURE_COLUMN},
                 null, null, null, null, null);
 
-        c.moveToFirst();
+        cursor.moveToFirst();
 
-        Log.v("FDR", "Rows: " + c.getCount());
+        Log.v("FDR", "Rows: " + cursor.getCount());
 
-        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             FlightRow row = new FlightRow();
 
-            row._id = c.getLong(0);
-            row.flight_name = c.getString(1);
-            row.pilot = c.getString(2);
-            row.plane = c.getString(3);
-            row.tail_number = c.getString(4);
-            row.pressure = c.getString(5);
-            row.temperature = c.getString(6);
+            row._id = cursor.getLong(0);
+            row.flight_name = cursor.getString(1);
+            row.pilot = cursor.getString(2);
+            row.plane = cursor.getString(3);
+            row.tail_number = cursor.getString(4);
+            row.pressure = cursor.getString(5);
+            row.temperature = cursor.getString(6);
 
             ret.add(row);
         }
 
-        c.close();
+        cursor.close();
 
         return ret;
     }
@@ -163,27 +206,34 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         //Create new database
         database.execSQL(LogTableValues.getCreateTable(flight_name));
 
+        for (FlightDataEvent event : log.getFlightDataEvents()) {
+            addEventToFlight(flight_name, event);
+        }
+    }
+
+    public void addEventToFlight(String flight_name, FlightDataEvent event) {
         ContentValues logValues = new ContentValues();
 
-        ArrayList<FlightDataEvent> events = log.getFlightDataEvents();
+        logValues.put(LogTableValues.SECONDS_COLUMN, event.getSeconds());
+        logValues.put(LogTableValues.LAT_COLUMN, event.getLat());
+        logValues.put(LogTableValues.LON_COLUMN, event.getLon());
+        logValues.put(LogTableValues.ALT_COLUMN, event.getAltitude());
+        logValues.put(LogTableValues.HEADING_COLUMN, event.getHeading());
+        logValues.put(LogTableValues.PITCH_COLUMN, event.getPitch());
+        logValues.put(LogTableValues.ROLL_COLUMN, event.getRoll());
 
-        for (FlightDataEvent event : events) {
-
-            logValues.put(LogTableValues.SECONDS_COLUMN, event.getSeconds());
-            logValues.put(LogTableValues.LAT_COLUMN, event.getLat());
-            logValues.put(LogTableValues.LON_COLUMN, event.getLon());
-            logValues.put(LogTableValues.ALT_COLUMN, event.getAltitude());
-            logValues.put(LogTableValues.HEADING_COLUMN, event.getHeading());
-            logValues.put(LogTableValues.PITCH_COLUMN, event.getPitch());
-            logValues.put(LogTableValues.ROLL_COLUMN, event.getRoll());
-
-            database.insert(flight_name, null, logValues);
-        }
+        database.insert(LogTableValues.TABLE_PREFIX + flight_name, null, logValues);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //db.execSQL(); //DELETE
         //onCreate(db);
+    }
+
+    @Override
+    public void close() {
+        database.close();
+        super.close();
     }
 }
