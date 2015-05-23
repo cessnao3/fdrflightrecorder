@@ -3,8 +3,6 @@ package com.ianorourke.fdrflightrecorder.FlightData;
 public class FlightDataEvent {
     double seconds = 0;
 
-    double temp = 0.0;
-
     double lon = 0.0;
     double lat = 0.0;
     int mslHeight = 0;
@@ -13,22 +11,18 @@ public class FlightDataEvent {
     double pitch = 0.0;
     double roll = 0.0;
 
-    double pressure = 29.92;
-
     public FlightDataEvent() {
         //Empty Constructor
     }
 
     public FlightDataEvent(FlightDataEvent event) {
         this.seconds = event.seconds;
-        this.temp = event.temp;
         this.lon = event.lon;
         this.lat = event.lat;
         this.mslHeight = event.mslHeight;
         this.heading = event.heading;
         this.pitch = event.pitch;
         this.roll = event.roll;
-        this.pressure = event.pressure;
     }
 
     public void setSeconds(double s) {
@@ -85,22 +79,6 @@ public class FlightDataEvent {
 
     public double getRoll() {
         return roll;
-    }
-
-    public void setPressure(double _pressure) {
-        pressure = _pressure;
-    }
-
-    public double getPressure() {
-        return pressure;
-    }
-
-    public void setTemperature(double _temperature) {
-        temp = _temperature;
-    }
-
-    public double getTemperature() {
-        return temp;
     }
 
     public FlightDataEvent clone() {

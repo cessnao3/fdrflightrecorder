@@ -1,5 +1,7 @@
 package com.ianorourke.fdrflightrecorder.FlightData;
 
+import android.support.annotation.NonNull;
+
 import com.ianorourke.fdrflightrecorder.R;
 
 import java.text.SimpleDateFormat;
@@ -19,7 +21,12 @@ public class FlightDataLog {
 
     ArrayList<FlightDataEvent> dataEvents;
 
-    public FlightDataLog(String pilot, String plane, String tail, String pressure, String temperature, Calendar time) {
+    public FlightDataLog(@NonNull String pilot,
+                         @NonNull String plane,
+                         @NonNull String tail,
+                         @NonNull String pressure,
+                         @NonNull String temperature,
+                         @NonNull Calendar time) {
         this.pilot = pilot;
         this.plane = plane;
         this.tail = tail;

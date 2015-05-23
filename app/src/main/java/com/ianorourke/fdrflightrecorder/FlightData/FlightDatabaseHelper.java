@@ -10,10 +10,11 @@ import android.util.Log;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class FlightDatabaseHelper extends SQLiteOpenHelper {
-    public class FlightRow extends Object {
+    public class FlightRow {
         public long _id;
         public String flight_name;
         public String pilot;
@@ -23,8 +24,8 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         public String temperature;
     }
 
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy-HH-mm-ss");
-    {
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy-HH-mm-ss", Locale.US);
+    static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
@@ -33,28 +34,56 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String COMMA_SEP = ", ";
     private static final String TEXT_DT = " TEXT NOT NULL";
-    private static final String AUTO_INCREMENT_KEY = " INTEGER PRIMARY KEY";
+    private static final String INTEGER_DT = " INTEGER NOT NULL";
+    private static final String REAL_DT = " REAL NOT NULL";
+    private static final String PRIMARY_KEY = " INTEGER PRIMARY KEY";
 
-    private static final String FLIGHT_TABLE = "FLIGHTS";
+    private static class FlightTableValues {
+        public static final String FLIGHT_TABLE = "FLIGHTS";
 
-    private static final String ID_COLUMN = "_id";
-    private static final String FLIGHT_COLUMN = "name";
-    private static final String PILOT_COLUMN = "pilot";
-    private static final String PLANE_COLUMN = "plane";
-    private static final String TAIL_COLUMN = "tail";
-    private static final String PRESSURE_COLUMN = "pressure";
-    private static final String TEMPERATURE_COLUMN = "temperature";
+        public static final String ID_COLUMN = "_id";
+        public static final String FLIGHT_COLUMN = "name";
+        public static final String PILOT_COLUMN = "pilot";
+        public static final String PLANE_COLUMN = "plane";
+        public static final String TAIL_COLUMN = "tail";
+        public static final String PRESSURE_COLUMN = "pressure";
+        public static final String TEMPERATURE_COLUMN = "temperature";
 
-    private static final String FLIGHT_TABLE_CREATE =
-            "CREATE TABLE " + FLIGHT_TABLE + " ("
-            + ID_COLUMN + AUTO_INCREMENT_KEY + COMMA_SEP
-            + FLIGHT_COLUMN + TEXT_DT + COMMA_SEP
-            + PILOT_COLUMN + TEXT_DT + COMMA_SEP
-            + PLANE_COLUMN + TEXT_DT + COMMA_SEP
-            + TAIL_COLUMN + TEXT_DT + COMMA_SEP
-            + PRESSURE_COLUMN + TEXT_DT + COMMA_SEP
-            + TEMPERATURE_COLUMN + TEXT_DT
-            + ");";
+        public static final String FLIGHT_TABLE_CREATE =
+                "CREATE TABLE " + FLIGHT_TABLE + " ("
+                        + ID_COLUMN + PRIMARY_KEY + COMMA_SEP
+                        + FLIGHT_COLUMN + TEXT_DT + COMMA_SEP
+                        + PILOT_COLUMN + TEXT_DT + COMMA_SEP
+                        + PLANE_COLUMN + TEXT_DT + COMMA_SEP
+                        + TAIL_COLUMN + TEXT_DT + COMMA_SEP
+                        + PRESSURE_COLUMN + TEXT_DT + COMMA_SEP
+                        + TEMPERATURE_COLUMN + TEXT_DT
+                        + ");";
+    }
+
+    private static class LogTableValues {
+        public static final String ID_COLUMN = "_id";
+        public static final String SECONDS_COLUMN = "seconds";
+        public static final String LAT_COLUMN = "latitude";
+        public static final String LON_COLUMN = "longitude";
+        public static final String ALT_COLUMN = "msl_altitude";
+        public static final String HEADING_COLUMN = "heading";
+        public static final String PITCH_COLUMN = "pitch";
+        public static final String ROLL_COLUMN = "roll";
+
+        public static String getCreateTable(String name) {
+            return "CREATE TABLE " + name + " ("
+                    + ID_COLUMN + PRIMARY_KEY + COMMA_SEP
+                    + SECONDS_COLUMN + REAL_DT + COMMA_SEP
+                    + LAT_COLUMN + REAL_DT + COMMA_SEP
+                    + LON_COLUMN + REAL_DT + COMMA_SEP
+                    + ALT_COLUMN + INTEGER_DT + COMMA_SEP
+                    + HEADING_COLUMN + INTEGER_DT + COMMA_SEP
+                    + PITCH_COLUMN + REAL_DT + COMMA_SEP
+                    + ROLL_COLUMN + REAL_DT
+                    + ");";
+        }
+    }
 
     private SQLiteDatabase database;
 
@@ -66,14 +95,29 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(FLIGHT_TABLE_CREATE);
+        db.execSQL(FlightTableValues.FLIGHT_TABLE_CREATE);
+    }
+
+    public FlightDataLog getFlight(long id) {
+        return null;
+    }
+
+    public FlightDataLog getFlight(String name) {
+        return null;
     }
 
     public List<FlightRow> getFlightList() {
         ArrayList<FlightRow> ret = new ArrayList<>();
 
-        Cursor c = database.query(FLIGHT_TABLE,
-                new String[]{ID_COLUMN, FLIGHT_COLUMN, PILOT_COLUMN, PLANE_COLUMN, TAIL_COLUMN, PRESSURE_COLUMN, TEMPERATURE_COLUMN},
+        Cursor c = database.query(FlightTableValues.FLIGHT_TABLE,
+                new String[]{
+                        FlightTableValues.ID_COLUMN,
+                        FlightTableValues.FLIGHT_COLUMN,
+                        FlightTableValues.PILOT_COLUMN,
+                        FlightTableValues.PLANE_COLUMN,
+                        FlightTableValues.TAIL_COLUMN,
+                        FlightTableValues.PRESSURE_COLUMN,
+                        FlightTableValues.TEMPERATURE_COLUMN},
                 null, null, null, null, null);
 
         c.moveToFirst();
@@ -102,16 +146,39 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
     public void addFlight(FlightDataLog log) {
         database = getWritableDatabase();
 
+        String flight_name = log.getName();
+
+        //Put in normal flight values
+        ContentValues flightValues = new ContentValues();
+
+        flightValues.put(FlightTableValues.FLIGHT_COLUMN, flight_name);
+        flightValues.put(FlightTableValues.PILOT_COLUMN, log.getPilot());
+        flightValues.put(FlightTableValues.PLANE_COLUMN, log.getPlane());
+        flightValues.put(FlightTableValues.TAIL_COLUMN, log.getTail());
+        flightValues.put(FlightTableValues.PRESSURE_COLUMN, log.getTail());
+        flightValues.put(FlightTableValues.TEMPERATURE_COLUMN, log.getTemperature());
+
+        database.insert(FlightTableValues.FLIGHT_TABLE, null, flightValues);
+
+        //Create new database
+        database.execSQL(LogTableValues.getCreateTable(flight_name));
+
         ContentValues logValues = new ContentValues();
 
-        logValues.put(FLIGHT_COLUMN, log.getName());
-        logValues.put(PILOT_COLUMN, log.getPilot());
-        logValues.put(PLANE_COLUMN, log.getPlane());
-        logValues.put(TAIL_COLUMN, log.getTail());
-        logValues.put(PRESSURE_COLUMN, log.getTail());
-        logValues.put(TEMPERATURE_COLUMN, log.getTemperature());
+        ArrayList<FlightDataEvent> events = log.getFlightDataEvents();
 
-        database.insert(FLIGHT_TABLE, null, logValues);
+        for (FlightDataEvent event : events) {
+
+            logValues.put(LogTableValues.SECONDS_COLUMN, event.getSeconds());
+            logValues.put(LogTableValues.LAT_COLUMN, event.getLat());
+            logValues.put(LogTableValues.LON_COLUMN, event.getLon());
+            logValues.put(LogTableValues.ALT_COLUMN, event.getAltitude());
+            logValues.put(LogTableValues.HEADING_COLUMN, event.getHeading());
+            logValues.put(LogTableValues.PITCH_COLUMN, event.getPitch());
+            logValues.put(LogTableValues.ROLL_COLUMN, event.getRoll());
+
+            database.insert(flight_name, null, logValues);
+        }
     }
 
     @Override

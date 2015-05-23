@@ -54,8 +54,7 @@ public class FDRFormatter {
         builder.append(event.getSeconds());
         builder.append(',');
 
-        builder.append(event.getTemperature());
-        builder.append(',');
+        builder.append("0,");
 
         builder.append(event.getLon());
         builder.append(',');
@@ -86,14 +85,10 @@ public class FDRFormatter {
 
         builder.append("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,");
         builder.append("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,");
-
-        builder.append(event.getPressure());
-        builder.append(',');
-
         builder.append("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,");
         builder.append("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,");
         builder.append("0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,");
-        builder.append("0,0,0,0,0,0,0,0,0,0,");
+        builder.append("0,0,0,0,0,0,0,0,0,0,0,");
 
         builder.append('\n');
     }
