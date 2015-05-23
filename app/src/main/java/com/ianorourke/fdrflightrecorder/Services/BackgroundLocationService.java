@@ -23,8 +23,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
-import com.ianorourke.fdrflightrecorder.FlightData.FlightDatabaseHelper;
-import com.ianorourke.fdrflightrecorder.FlightData.FlightRow;
+import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
+import com.ianorourke.fdrflightrecorder.Database.FlightRow;
 import com.ianorourke.fdrflightrecorder.MapActivity;
 import com.ianorourke.fdrflightrecorder.FlightFormatters.FDRFormatter;
 import com.ianorourke.fdrflightrecorder.R;
@@ -161,9 +161,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         Calendar zuluTime = GregorianCalendar.getInstance();
 
         databaseHelper = FlightDatabaseHelper.getInstance(getApplicationContext());
+        databaseHelper.markAllFlightsCompleted();
 
         flightLog = new FlightDataLog("Ian O'Rourke", "Cessna 172", "N755PR", "29.92", "14", zuluTime);
-        databaseHelper.addFlight(flightLog);
+        databaseHelper.addFlight(flightLog, true);
 
         flightEvent = new FlightDataEvent();
 
@@ -295,6 +296,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     private void saveLog(FlightDataLog log) {
         File saveFile = getFile(log.getFilename() + FDRFormatter.FILE_EXT);
+        if (saveFile == null) return;
 
         try {
             FileWriter fileWriter = new FileWriter(saveFile);
@@ -329,7 +331,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         soundStart.cancelAll();
 
-        //saveLog(flightLog);
+        saveLog(flightLog);
         Log.v("FDR", "File Saved " + flightLog.getName());
 
         for (FlightRow row : databaseHelper.getFlightList()) {
@@ -337,14 +339,12 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
             FlightDataLog flight = databaseHelper.getFlight(row);
 
-            saveLog(flight);
-
             for (FlightDataEvent event : flight.getFlightDataEvents()) {
                 Log.v("FDR", "\t" + event.getSeconds());
             }
         }
 
-        databaseHelper.close();
+        databaseHelper.markAllFlightsCompleted();
 
         //Final Closeout
         notificationManager.cancelAll();

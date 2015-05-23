@@ -1,8 +1,9 @@
-package com.ianorourke.fdrflightrecorder.FlightData;
+package com.ianorourke.fdrflightrecorder.Database;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class FlightRow {
     public long _id;
@@ -12,6 +13,7 @@ public class FlightRow {
     public String tail_number;
     public String pressure;
     public String temperature;
+    public boolean in_progress;
 
     @Override
     public String toString() {
@@ -20,8 +22,9 @@ public class FlightRow {
 
     public String getDate() {
         try {
-            String file = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)).format(FlightDatabaseHelper.dateFormat.parse(flight_name));
-            return file;
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return formatter.format(FlightDatabaseHelper.dateFormat.parse(flight_name));
         } catch (ParseException e) {
             e.printStackTrace();
             return flight_name;

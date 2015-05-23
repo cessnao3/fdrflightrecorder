@@ -87,6 +87,11 @@ public class MainActivity extends AppCompatActivity {
                 newFragment = new RecordedFlightsFragment();
         }
 
+        if (position == getResources().getInteger(R.integer.nav_new)) {
+            startActivity(new Intent(MainActivity.this, MapActivity.class));
+            newFragment = new AircraftFragment();
+        }
+
         if (newFragment != null) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
             ft.replace(mLinearLayout.getId(), newFragment);
@@ -94,9 +99,6 @@ public class MainActivity extends AppCompatActivity {
 
             mCurrentFragment = newFragment;
         }
-
-        if (position == getResources().getInteger(R.integer.nav_new))
-            startActivity(new Intent(MainActivity.this, MapActivity.class));
     }
 
     private void setupDrawer() {

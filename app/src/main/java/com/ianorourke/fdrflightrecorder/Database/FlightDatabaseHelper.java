@@ -1,4 +1,4 @@
-package com.ianorourke.fdrflightrecorder.FlightData;
+package com.ianorourke.fdrflightrecorder.Database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
+import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,6 +44,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         public static final String TAIL_COLUMN = "tail";
         public static final String PRESSURE_COLUMN = "pressure";
         public static final String TEMPERATURE_COLUMN = "temperature";
+        public static final String PROGRESS_COLUMN = "in_progress";
 
         public static final String FLIGHT_TABLE_CREATE =
                 "CREATE TABLE " + FLIGHT_TABLE + " ("
@@ -50,7 +54,8 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
                         + PLANE_COLUMN + TEXT_DT + COMMA_SEP
                         + TAIL_COLUMN + TEXT_DT + COMMA_SEP
                         + PRESSURE_COLUMN + TEXT_DT + COMMA_SEP
-                        + TEMPERATURE_COLUMN + TEXT_DT
+                        + TEMPERATURE_COLUMN + TEXT_DT + COMMA_SEP
+                        + PROGRESS_COLUMN + INTEGER_DT
                         + ");";
     }
 
@@ -149,6 +154,15 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         return dataLog;
     }
 
+    public void markAllFlightsCompleted() {
+        ContentValues values = new ContentValues();
+        values.put(FlightTableValues.PROGRESS_COLUMN, 0);
+
+        String selection = "  " + FlightTableValues.PROGRESS_COLUMN + "=1";
+
+        database.update(FlightTableValues.FLIGHT_TABLE, values, selection, null);
+    }
+
     public List<FlightRow> getFlightList() {
         ArrayList<FlightRow> ret = new ArrayList<>();
 
@@ -160,7 +174,8 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
                         FlightTableValues.PLANE_COLUMN,
                         FlightTableValues.TAIL_COLUMN,
                         FlightTableValues.PRESSURE_COLUMN,
-                        FlightTableValues.TEMPERATURE_COLUMN},
+                        FlightTableValues.TEMPERATURE_COLUMN,
+                        FlightTableValues.PROGRESS_COLUMN},
                 null, null, null, null, null);
 
         cursor.moveToFirst();
@@ -177,6 +192,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
             row.tail_number = cursor.getString(4);
             row.pressure = cursor.getString(5);
             row.temperature = cursor.getString(6);
+            row.in_progress = cursor.getInt(7) != 0;
 
             ret.add(row);
         }
@@ -186,7 +202,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         return ret;
     }
 
-    public void addFlight(FlightDataLog log) {
+    public void addFlight(FlightDataLog log, boolean in_progress) {
         database = getWritableDatabase();
 
         String flight_name = log.getName();
@@ -200,6 +216,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         flightValues.put(FlightTableValues.TAIL_COLUMN, log.getTail());
         flightValues.put(FlightTableValues.PRESSURE_COLUMN, log.getTail());
         flightValues.put(FlightTableValues.TEMPERATURE_COLUMN, log.getTemperature());
+        flightValues.put(FlightTableValues.PROGRESS_COLUMN, ((in_progress) ? 1 : 0));
 
         database.insert(FlightTableValues.FLIGHT_TABLE, null, flightValues);
 

@@ -2,10 +2,13 @@ package com.ianorourke.fdrflightrecorder.FlightData;
 
 import android.support.annotation.NonNull;
 
+import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class FlightDataLog {
     String pressure;
@@ -74,6 +77,7 @@ public class FlightDataLog {
 
     public String getFilename() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss", Locale.US);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(time.getTime());
     }
 }
