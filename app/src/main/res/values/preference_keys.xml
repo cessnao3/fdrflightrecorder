@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_pilot_name">pilot_name_preference</string>
+
+    <string name="pref_sound_start">sound_start_preference</string>
+    <string name="pref_sound_stop">sound_stop_preference</string>
+    <string name="pref_sound_amplitude">sound_amplitude_preference</string>
+    <string name="pref_sound_seconds">sound_hold_seconds</string>
+</resources>

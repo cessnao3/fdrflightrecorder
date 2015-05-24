@@ -40,7 +40,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         public static final String PROGRESS_COLUMN = "in_progress";
 
         public static final String FLIGHT_TABLE_CREATE =
-                "CREATE TABLE " + FLIGHT_TABLE + " ("
+                "CREATE TABLE IF NOT EXISTS " + FLIGHT_TABLE + " ("
                         + ID_COLUMN + PRIMARY_KEY + COMMA_SEP
                         + FLIGHT_COLUMN + TEXT_DT + COMMA_SEP
                         + PILOT_COLUMN + TEXT_DT + COMMA_SEP
@@ -78,6 +78,21 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    private static class AircraftTableValues {
+        public static final String TABLE_NAME = "AIRCRAFT";
+
+        public static final String ID_COLUMN = "_id";
+        public static final String AIRCRAFT_COLUMN = "aircraft";
+        public static final String TAIL_COLUMN = "tail";
+
+        public static final String AIRCRAFT_TABLE_CREATE =
+                "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ("
+                    + ID_COLUMN + PRIMARY_KEY + COMMA_SEP
+                    + AIRCRAFT_COLUMN + TEXT_DT + COMMA_SEP
+                    + TAIL_COLUMN + TEXT_DT
+                    + ");";
+    }
+
     private SQLiteDatabase database;
 
     private static FlightDatabaseHelper databaseInstance;
@@ -98,6 +113,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(FlightTableValues.FLIGHT_TABLE_CREATE);
+        db.execSQL(AircraftTableValues.AIRCRAFT_TABLE_CREATE);
     }
 
     public FlightDataLog getFlight(FlightRow flight) {
@@ -153,6 +169,10 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public List<FlightRow> getFlightList() {
+        return getFlightListForTail(null);
+    }
+
+    public List<FlightRow> getFlightListForTail(String tail) {
         ArrayList<FlightRow> ret = new ArrayList<>();
 
         Cursor cursor = database.query(FlightTableValues.FLIGHT_TABLE,
@@ -165,7 +185,9 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
                         FlightTableValues.PRESSURE_COLUMN,
                         FlightTableValues.TEMPERATURE_COLUMN,
                         FlightTableValues.PROGRESS_COLUMN},
-                null, null, null, null, null);
+                ((tail == null) ? null : FlightTableValues.TAIL_COLUMN + " = ?"),
+                ((tail == null) ? null : new String[] {tail}),
+                null, null, null);
 
         cursor.moveToFirst();
 
@@ -192,8 +214,6 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void addFlight(FlightDataLog log, boolean in_progress) {
-        database = getWritableDatabase();
-
         String flight_name = log.getName();
 
         //Put in normal flight values
@@ -217,6 +237,16 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void removeFlight(FlightRow flight) {
+        String table_name = LogTableValues.TABLE_PREFIX + flight.flight_name;
+
+        database.delete(FlightTableValues.FLIGHT_TABLE,
+                FlightTableValues.FLIGHT_COLUMN + " = ?",
+                new String[] {flight.flight_name});
+
+        database.execSQL("DROP TABLE " + table_name);
+    }
+
     public void addEventToFlight(String flight_name, FlightDataEvent event) {
         ContentValues logValues = new ContentValues();
 
@@ -229,6 +259,59 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         logValues.put(LogTableValues.ROLL_COLUMN, event.getRoll());
 
         database.insert(LogTableValues.TABLE_PREFIX + flight_name, null, logValues);
+    }
+
+    public boolean addAircraft(String aircraft, String tail) {
+        Cursor cursor = database.query(AircraftTableValues.TABLE_NAME,
+                            new String[] {AircraftTableValues.TAIL_COLUMN},
+                            AircraftTableValues.TAIL_COLUMN + " = ?",
+                            new String[] {tail},
+                            null, null, null);
+
+        if (cursor.getCount() > 0) return false;
+
+        ContentValues aircraftValues = new ContentValues();
+
+        aircraftValues.put(AircraftTableValues.AIRCRAFT_COLUMN, aircraft);
+        aircraftValues.put(AircraftTableValues.TAIL_COLUMN, tail);
+
+        database.insert(AircraftTableValues.TABLE_NAME, null, aircraftValues);
+
+        return true;
+    }
+
+    public boolean addAircraft(AircraftRow aircraft) {
+        return addAircraft(aircraft.getAircraft(), aircraft.getTail());
+    }
+
+    public void removeAircraft(String tail) {
+        database.delete(AircraftTableValues.TABLE_NAME,
+                AircraftTableValues.TAIL_COLUMN + " = ?",
+                new String[]{tail});
+    }
+
+    public void removeAircraft(AircraftRow aircraft) {
+        removeAircraft(aircraft.getTail());
+    }
+
+    public List<AircraftRow> getAircraftFlights() {
+        Cursor cursor = database.query(AircraftTableValues.TABLE_NAME,
+                new String[]{AircraftTableValues.AIRCRAFT_COLUMN, AircraftTableValues.TAIL_COLUMN},
+                null, null, null, null, null);
+
+        cursor.moveToFirst();
+
+        Log.v("FDR", "Flights: " + cursor.getCount());
+
+        ArrayList<AircraftRow> ret = new ArrayList<>();
+
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            AircraftRow row = new AircraftRow(cursor.getString(0), cursor.getString(1));
+
+            ret.add(row);
+        }
+
+        return ret;
     }
 
     @Override

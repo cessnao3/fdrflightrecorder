@@ -3,7 +3,9 @@ package com.ianorourke.fdrflightrecorder;
 import android.app.Activity;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -103,9 +105,12 @@ public class MapActivity extends AppCompatActivity implements MapReceiver.MapDat
     }
 
     public void startStopButtonPressed(View v) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         Intent serviceIntent = new Intent(this, BackgroundLocationService.class);
-        serviceIntent.putExtra(getString(R.string.service_soundstart), ((CheckBox) findViewById(R.id.checkbox_sound_start)).isChecked());
-        serviceIntent.putExtra(getString(R.string.service_soundstop), ((CheckBox) findViewById(R.id.checkbox_sound_stop)).isChecked());
+        serviceIntent.putExtra(getString(R.string.service_soundstart), sharedPreferences.getBoolean(getString(R.string.pref_sound_start), false));
+        serviceIntent.putExtra(getString(R.string.service_soundstop), sharedPreferences.getBoolean(getString(R.string.pref_sound_stop), false));
+        serviceIntent.putExtra(getString(R.string.service_pilot_name), sharedPreferences.getString(getString(R.string.pref_pilot_name), ""));
 
         if (BackgroundLocationService.isRunning()) {
             stopService(serviceIntent);

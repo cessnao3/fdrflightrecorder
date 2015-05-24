@@ -4,25 +4,45 @@
     <!-- TODO: MOVE ALL TO STRING XML STUFFS -->
 
     <PreferenceCategory
+        android:title="Pilot Settings">
+
+        <EditTextPreference
+            android:key="@string/pref_pilot_name"
+            android:title="Pilot Name"
+            android:hint="Pilot Name"
+            android:summary="The Name of the Pilot"
+            android:defaultValue=""
+            android:inputType="textPersonName"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="Sound Settings">
 
         <CheckBoxPreference
-            android:key="sound_start_preference"
+            android:key="@string/pref_sound_start"
             android:title="Sound Start Enabled"
             android:summary="Enables and Disables Sound Start"
             android:defaultValue="true"/>
 
         <CheckBoxPreference
-            android:key="sound_stop_preference"
+            android:key="@string/pref_sound_stop"
             android:title="Sound Stop Enabled"
             android:summary="Enables and Disables Sound Stop"
             android:defaultValue="true"/>
 
         <EditTextPreference
-            android:key="sound_amplitude_preference"
+            android:key="@string/pref_sound_amplitude"
             android:title="Sound Start/Stop Amplitude"
-            android:summery="Sets the Amplitude for Sound Start and Stop"
+            android:summary="Sets the Amplitude for Sound Start and Stop"
             android:defaultValue="15000"
+            android:inputType="number"/>
+
+        <EditTextPreference
+            android:key="@string/pref_sound_seconds"
+            android:title="Sound Start/Stop Seconds"
+            android:summary="Sets the Number of Seconds to Wait"
+            android:defaultValue="5"
             android:inputType="number"/>
 
     </PreferenceCategory>

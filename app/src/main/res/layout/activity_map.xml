@@ -16,20 +16,6 @@
             android:text="Start Recording"
             android:onClick="startStopButtonPressed"
             android:id="@+id/button_start_stop" />
-
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sound Start Enabled"
-            android:checked="false"
-            android:id="@+id/checkbox_sound_start"/>
-
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sound Stop Enabled"
-            android:checked="false"
-            android:id="@+id/checkbox_sound_stop"/>
     </LinearLayout>
 
     <fragment

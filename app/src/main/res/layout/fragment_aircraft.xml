@@ -1,9 +1,26 @@
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="com.ianorourke.fdrflightrecorder.Fragments.AircraftFragment">
 
-</LinearLayout>
+    <ListView
+        android:id="@+id/list_aircraft"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="start" />
+
+    <com.melnykov.fab.FloatingActionButton
+        android:id="@+id/fab_aircraft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:layout_margin="16dp"
+        android:src="@android:drawable/ic_input_add"
+        fab:fab_colorNormal="@color/primary"
+        fab:fab_colorPressed="@color/primary_dark"
+        fab:fab_colorRipple="@color/ripple" />
+
+</FrameLayout>

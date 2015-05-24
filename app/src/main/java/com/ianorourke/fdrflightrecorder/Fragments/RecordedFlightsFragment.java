@@ -1,6 +1,8 @@
 package com.ianorourke.fdrflightrecorder.Fragments;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,17 +14,24 @@ import android.widget.Toast;
 
 import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
 import com.ianorourke.fdrflightrecorder.Database.FlightRow;
+import com.ianorourke.fdrflightrecorder.FlightFormatters.FDRFormatter;
+import com.ianorourke.fdrflightrecorder.FlightFormatters.WriteLog;
 import com.ianorourke.fdrflightrecorder.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class RecordedFlightsFragment extends Fragment {
 
+    private static String[] RECORDED_MENU_OPTIONS = {"Export Flight", "Delete Flight"};
+
     ArrayList<FlightRow> flightRows;
     ArrayList<Map<String, String>> flightData;
+
+    ListView listView;
 
     public RecordedFlightsFragment() {
         //Empty Constructor
@@ -39,21 +48,38 @@ public class RecordedFlightsFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_recorded_flights, container, false);
 
-        ListView listView = (ListView) v.findViewById(R.id.list_recorded_flights);
+        listView = (ListView) v.findViewById(R.id.list_recorded_flights);
 
         flightRows = new ArrayList<>();
         flightData = new ArrayList<>();
 
         UpdateLists();
 
-        final SimpleAdapter adapter = new SimpleAdapter(
-                getActivity(),
-                flightData,
-                android.R.layout.simple_list_item_2,
-                new String[] {"title", "subtitle"},
-                new int[] {android.R.id.text1, android.R.id.text2});
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setItems(RECORDED_MENU_OPTIONS, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    FlightDatabaseHelper databaseHelper = FlightDatabaseHelper.getInstance(getActivity().getApplicationContext());
 
-        listView.setAdapter(adapter);
+                                    if (which == 0) {
+                                        FDRFormatter fdrFormatter = new FDRFormatter();
+                                        WriteLog.saveLog(getActivity(), databaseHelper.getFlight(flightRows.get(position)), fdrFormatter);
+                                    } else if (which == 1) {
+                                            databaseHelper.removeFlight(flightRows.get(position));
+
+                                            UpdateLists();
+                                        }
+                                    }
+                                })
+                        .setCancelable(true)
+                        .create().show();
+
+                return true;
+            }
+        });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -66,10 +92,12 @@ public class RecordedFlightsFragment extends Fragment {
     }
 
     public void UpdateLists() {
+        List<FlightRow> newRows = FlightDatabaseHelper.getInstance(getActivity().getApplicationContext()).getFlightList();
+
         flightRows.clear();
         flightData.clear();
 
-        flightRows.addAll(FlightDatabaseHelper.getInstance(getActivity().getApplicationContext()).getFlightList());
+        flightRows.addAll(newRows);
 
         Iterator<FlightRow> i = flightRows.iterator();
 
@@ -85,6 +113,15 @@ public class RecordedFlightsFragment extends Fragment {
                 flightData.add(datum);
             }
         }
+
+        final SimpleAdapter adapter = new SimpleAdapter(
+                getActivity(),
+                flightData,
+                android.R.layout.simple_list_item_2,
+                new String[] {"title", "subtitle"},
+                new int[] {android.R.id.text1, android.R.id.text2});
+
+        listView.setAdapter(adapter);
     }
 
 

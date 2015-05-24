@@ -126,6 +126,9 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         soundStartEnabled = intent.getBooleanExtra(getString(R.string.service_soundstart), false);
         soundStopEnabled = intent.getBooleanExtra(getString(R.string.service_soundstop), false);
 
+        String pilot = intent.getStringExtra(getString(R.string.service_pilot_name));
+        if (pilot == null) pilot = "";
+
         soundStart = new SoundStart(MIN_AMPLITUDE, NUM_HOLD_SECONDS, this);
 
         // Checking if Null
@@ -163,8 +166,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         databaseHelper = FlightDatabaseHelper.getInstance(getApplicationContext());
         databaseHelper.markAllFlightsCompleted();
 
-        flightLog = new FlightDataLog("Ian O'Rourke", "Cessna 172", "N755PR", "29.92", "14", zuluTime);
-        databaseHelper.addFlight(flightLog, true);
+        flightLog = new FlightDataLog(pilot, "Cessna 172", "N755PR", "29.92", "14", zuluTime);
 
         flightEvent = new FlightDataEvent();
 
@@ -195,6 +197,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     private void startLog() {
         Log.v("FDR", "Log Started");
+
+        databaseHelper.addFlight(flightLog, true);
 
         isStarted = true;
 
@@ -275,40 +279,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         Toast.makeText(this, "Connection Failed: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG).show();
     }
 
-    private File getFile(String filename) {
-        File folderFile = new File(Environment.getExternalStorageDirectory(), getString(R.string.save_folder));
-        if (!folderFile.exists())
-            if (!folderFile.mkdir())
-                Log.e("FDR", "File Creation Error");
-
-        File file = new File(folderFile, filename);
-
-        boolean success = false;
-
-        try {
-            if (!file.exists()) success = file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return (success) ? file : null;
-    }
-
-    private void saveLog(FlightDataLog log) {
-        File saveFile = getFile(log.getFilename() + FDRFormatter.FILE_EXT);
-        if (saveFile == null) return;
-
-        try {
-            FileWriter fileWriter = new FileWriter(saveFile);
-
-            fileWriter.write(FDRFormatter.formatLog(log));
-            fileWriter.flush();
-            fileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void onDestroy() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -330,9 +300,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         isStarted = false;
 
         soundStart.cancelAll();
-
-        saveLog(flightLog);
-        Log.v("FDR", "File Saved " + flightLog.getName());
 
         for (FlightRow row : databaseHelper.getFlightList()) {
             Log.v("FDR", "Flight: " + row.flight_name);

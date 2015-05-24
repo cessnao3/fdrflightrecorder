@@ -6,10 +6,11 @@ import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-public class FDRFormatter {
+public class FDRFormatter implements FlightFormatter {
     public final static  String FILE_EXT = ".fdr";
 
-    public static String formatLog(FlightDataLog data) {
+    @Override
+    public String formatLog(FlightDataLog data) {
 
         StringBuilder logBuffer = new StringBuilder();
 
@@ -17,6 +18,8 @@ public class FDRFormatter {
         logBuffer.append('\n');
 
         logBuffer.append("COMM, This FDR File was created by FDR Flight Recorder\n");
+        if (data.getPilot() != null && data.getPilot() != "") logBuffer.append("COMM, Pilot: " + data.getPilot() + "\n");
+        if (data.getPlane() != null && data.getPlane() != "") logBuffer.append("COMM, Aircraft: " + data.getPlane() + "\n");
         logBuffer.append('\n');
 
         SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
@@ -31,7 +34,6 @@ public class FDRFormatter {
         logBuffer.append("DATE," + formattedDate + ",\n");
         logBuffer.append("TIME," + formattedTime + ",\n");
 
-        if (data.getPlane() != null && data.getPlane() != "") logBuffer.append("ACFT," + data.getPlane() + ",\n");
         if (data.getTail() != null && data.getTail() != "") logBuffer.append("TAIL," + data.getTail() + ",\n");
         if (data.getPressure() != null && data.getPressure() != "") logBuffer.append("PRES," + data.getPressure() + ",\n");
         if (data.getTemperature() != null && data.getTemperature() != "") logBuffer.append("TEMP," + data.getTemperature() + ",\n");

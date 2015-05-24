@@ -13,6 +13,7 @@
     <string name="service_wakelock">map_service_wake_lock</string>
     <string name="service_soundstart">service_sound_start</string>
     <string name="service_soundstop">service_sound_stop</string>
+    <string name="service_pilot_name">service_pilot_name</string>
 
     <string name="prefs_app">PrefsApp</string>
     <string name="prefs_aircraft">PrefsAircraft</string>

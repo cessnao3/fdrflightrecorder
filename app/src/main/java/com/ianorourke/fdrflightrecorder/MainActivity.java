@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (position == getResources().getInteger(R.integer.nav_recorded)) {
             if (mCurrentFragment == null || mCurrentFragment.getClass() != RecordedFlightsFragment.class)
                 newFragment = new RecordedFlightsFragment();
-        } else if (position == getResources().getInteger(R.integer.nav_aircraft)) {
+        } else if (position == getResources().getInteger(R.integer.nav_settings)) {
             if (mCurrentFragment == null || mCurrentFragment.getClass() != PrefsFragment.class)
                 newFragment = new PrefsFragment();
         }
