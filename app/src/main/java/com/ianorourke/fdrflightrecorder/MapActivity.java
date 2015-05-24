@@ -27,8 +27,6 @@ import com.ianorourke.fdrflightrecorder.Services.BackgroundLocationService;
 import java.util.ArrayList;
 
 public class MapActivity extends AppCompatActivity implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
-    //http://developer.android.com/guide/topics/data/data-storage.html
-
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private Marker mLocationMarker;

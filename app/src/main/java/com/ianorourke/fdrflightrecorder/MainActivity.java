@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.ianorourke.fdrflightrecorder.Fragments.AircraftFragment;
+import com.ianorourke.fdrflightrecorder.Fragments.PrefsFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.RecordedFlightsFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.WeatherFragment;
 
@@ -71,8 +72,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setPosition(int position) {
-        String[] navArray = getResources().getStringArray(R.array.navigation_actions);
-        getSupportActionBar().setTitle(navArray[position]);
+        getSupportActionBar().setTitle(mNavigationActions[position]);
 
         Fragment newFragment = null;
 
@@ -85,10 +85,14 @@ public class MainActivity extends AppCompatActivity {
         } else if (position == getResources().getInteger(R.integer.nav_recorded)) {
             if (mCurrentFragment == null || mCurrentFragment.getClass() != RecordedFlightsFragment.class)
                 newFragment = new RecordedFlightsFragment();
+        } else if (position == getResources().getInteger(R.integer.nav_aircraft)) {
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != PrefsFragment.class)
+                newFragment = new PrefsFragment();
         }
 
         if (position == getResources().getInteger(R.integer.nav_new)) {
             startActivity(new Intent(MainActivity.this, MapActivity.class));
+
             newFragment = new AircraftFragment();
         }
 
@@ -129,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        //int id = item.getItemId();
 
         /*
         if (id == R.id.action_settings) {
@@ -137,10 +141,7 @@ public class MainActivity extends AppCompatActivity {
         }
         */
 
-        if (mDrawerToggle.onOptionsItemSelected(item))
-            return true;
-
-        return super.onOptionsItemSelected(item);
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override

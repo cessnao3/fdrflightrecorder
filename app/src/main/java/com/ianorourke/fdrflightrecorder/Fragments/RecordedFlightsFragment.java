@@ -14,11 +14,9 @@ import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
 import com.ianorourke.fdrflightrecorder.Database.FlightRow;
 import com.ianorourke.fdrflightrecorder.R;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class RecordedFlightsFragment extends Fragment {

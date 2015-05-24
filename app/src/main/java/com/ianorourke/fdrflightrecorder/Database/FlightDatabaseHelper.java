@@ -10,20 +10,13 @@ import android.util.Log;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 public class FlightDatabaseHelper extends SQLiteOpenHelper {
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "FlightLogs.db";
@@ -109,12 +102,8 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
 
     public FlightDataLog getFlight(FlightRow flight) {
         Calendar calendar = GregorianCalendar.getInstance();
-
-        try {
-            calendar.setTime(dateFormat.parse(flight.flight_name));
-        } catch (ParseException e) {
-            Log.e("FDR", "Error: " + e.toString());
-        }
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeInMillis(Long.parseLong(flight.flight_name));
 
         FlightDataLog dataLog = new FlightDataLog(
                 flight.pilot,

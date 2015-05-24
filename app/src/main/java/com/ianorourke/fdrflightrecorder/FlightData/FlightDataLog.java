@@ -2,8 +2,6 @@ package com.ianorourke.fdrflightrecorder.FlightData;
 
 import android.support.annotation.NonNull;
 
-import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,7 +70,7 @@ public class FlightDataLog {
     }
 
     public String getName() {
-        return FlightDatabaseHelper.dateFormat.format(time.getTime());
+        return String.valueOf(time.getTimeInMillis());
     }
 
     public String getFilename() {
