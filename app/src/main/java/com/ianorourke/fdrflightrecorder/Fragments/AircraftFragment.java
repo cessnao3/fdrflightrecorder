@@ -3,7 +3,7 @@ package com.ianorourke.fdrflightrecorder.Fragments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,7 +121,7 @@ public class AircraftFragment extends Fragment {
     }
 
     public void UpdateLists() {
-        List<AircraftRow> newRows = FlightDatabaseHelper.getInstance(getActivity().getApplicationContext()).getAircraftFlights();
+        List<AircraftRow> newRows = FlightDatabaseHelper.getInstance(getActivity().getApplicationContext()).getAllAircraft();
 
         aircraftRows.clear();
         aircraftData.clear();

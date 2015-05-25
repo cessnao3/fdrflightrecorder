@@ -14,6 +14,8 @@
     <string name="service_soundstart">service_sound_start</string>
     <string name="service_soundstop">service_sound_stop</string>
     <string name="service_pilot_name">service_pilot_name</string>
+    <string name="service_plane_type">service_plane_type</string>
+    <string name="service_plane_tail">service_plane_tail</string>
 
     <string name="prefs_app">PrefsApp</string>
     <string name="prefs_aircraft">PrefsAircraft</string>

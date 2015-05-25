@@ -294,7 +294,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         removeAircraft(aircraft.getTail());
     }
 
-    public List<AircraftRow> getAircraftFlights() {
+    public List<AircraftRow> getAllAircraft() {
         Cursor cursor = database.query(AircraftTableValues.TABLE_NAME,
                 new String[]{AircraftTableValues.AIRCRAFT_COLUMN, AircraftTableValues.TAIL_COLUMN},
                 null, null, null, null, null);

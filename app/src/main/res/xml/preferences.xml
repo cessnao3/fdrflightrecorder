@@ -23,13 +23,13 @@
             android:key="@string/pref_sound_start"
             android:title="Sound Start Enabled"
             android:summary="Enables and Disables Sound Start"
-            android:defaultValue="true"/>
+            android:defaultValue="false"/>
 
         <CheckBoxPreference
             android:key="@string/pref_sound_stop"
             android:title="Sound Stop Enabled"
             android:summary="Enables and Disables Sound Stop"
-            android:defaultValue="true"/>
+            android:defaultValue="false"/>
 
         <EditTextPreference
             android:key="@string/pref_sound_amplitude"

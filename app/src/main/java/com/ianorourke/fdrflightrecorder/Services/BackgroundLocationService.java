@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
@@ -24,16 +23,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
-import com.ianorourke.fdrflightrecorder.Database.FlightRow;
-import com.ianorourke.fdrflightrecorder.MapActivity;
-import com.ianorourke.fdrflightrecorder.FlightFormatters.FDRFormatter;
+import com.ianorourke.fdrflightrecorder.Fragments.NewRecordFlightFragment;
 import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
 import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Timer;
@@ -148,7 +142,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         wakeLock.acquire();
 
         // Notification
-        Intent viewIntent = new Intent(this, MapActivity.class);
+        Intent viewIntent = new Intent(this, NewRecordFlightFragment.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
 
         notificationBuilder = new Notification.Builder(getApplicationContext());
@@ -300,16 +294,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         isStarted = false;
 
         soundStart.cancelAll();
-
-        for (FlightRow row : databaseHelper.getFlightList()) {
-            Log.v("FDR", "Flight: " + row.flight_name);
-
-            FlightDataLog flight = databaseHelper.getFlight(row);
-
-            for (FlightDataEvent event : flight.getFlightDataEvents()) {
-                Log.v("FDR", "\t" + event.getSeconds());
-            }
-        }
+        soundStart = null;
 
         databaseHelper.markAllFlightsCompleted();
 

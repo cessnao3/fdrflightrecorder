@@ -62,7 +62,7 @@
         </activity>
 
         <activity
-            android:name=".MapActivity"
+            android:name=".Fragments.NewRecordFlightFragment"
             android:label="@string/title_activity_map"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity">

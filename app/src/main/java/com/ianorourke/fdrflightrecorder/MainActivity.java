@@ -1,11 +1,10 @@
 package com.ianorourke.fdrflightrecorder;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.ianorourke.fdrflightrecorder.Fragments.AircraftFragment;
+import com.ianorourke.fdrflightrecorder.Fragments.NewRecordFlightFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.PrefsFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.RecordedFlightsFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.WeatherFragment;
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mLinearLayout = (LinearLayout) findViewById(R.id.main_layout);
-        mFragmentManager = getFragmentManager();
+        mFragmentManager = getSupportFragmentManager();
 
         addDrawerItems();
         setupDrawer();
@@ -71,35 +71,38 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setPosition(int position) {
-        getSupportActionBar().setTitle(mNavigationActions[position]);
+    AircraftFragment mAircraftFragment;
+    WeatherFragment mWeatherFragment;
+    RecordedFlightsFragment mRecordedFragment;
+    NewRecordFlightFragment mNewFlightFragment;
+    PrefsFragment mPrefsFragment;
 
+    private void setPosition(int position) {
         Fragment newFragment = null;
 
         if (position == getResources().getInteger(R.integer.nav_aircraft)) {
-            if (mCurrentFragment == null || mCurrentFragment.getClass() != AircraftFragment.class)
-                newFragment = new AircraftFragment();
+            if (mAircraftFragment == null) mAircraftFragment = new AircraftFragment();
+            newFragment = mAircraftFragment;
         } else if (position == getResources().getInteger(R.integer.nav_weather)) {
-            if (mCurrentFragment == null || mCurrentFragment.getClass() != WeatherFragment.class)
-                newFragment = new WeatherFragment();
+            if (mWeatherFragment == null) mWeatherFragment = new WeatherFragment();
+            newFragment = mWeatherFragment;
         } else if (position == getResources().getInteger(R.integer.nav_recorded)) {
-            if (mCurrentFragment == null || mCurrentFragment.getClass() != RecordedFlightsFragment.class)
-                newFragment = new RecordedFlightsFragment();
+            if (mRecordedFragment == null) mRecordedFragment = new RecordedFlightsFragment();
+            newFragment = mRecordedFragment;
+        } else if (position == getResources().getInteger(R.integer.nav_new)) {
+            if (mNewFlightFragment == null) mNewFlightFragment = new NewRecordFlightFragment();
+            newFragment = mNewFlightFragment;
         } else if (position == getResources().getInteger(R.integer.nav_settings)) {
-            if (mCurrentFragment == null || mCurrentFragment.getClass() != PrefsFragment.class)
-                newFragment = new PrefsFragment();
+            if (mPrefsFragment == null) mPrefsFragment = new PrefsFragment();
+            newFragment = mPrefsFragment;
         }
 
-        if (position == getResources().getInteger(R.integer.nav_new)) {
-            startActivity(new Intent(MainActivity.this, MapActivity.class));
-
-            newFragment = new AircraftFragment();
-        }
-
-        if (newFragment != null) {
+        if (newFragment != mCurrentFragment) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
             ft.replace(mLinearLayout.getId(), newFragment);
             ft.commit();
+
+            getSupportActionBar().setTitle(mNavigationActions[position]);
 
             mCurrentFragment = newFragment;
         }
