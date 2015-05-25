@@ -17,6 +17,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -31,11 +32,7 @@ import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
 
-public class NewRecordFlightFragment extends Fragment implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface, FragmentTag {
-    @Override
-    public String getFragmentTag() {
-        return "map_fragment";
-    }
+public class NewRecordFlightFragment extends Fragment implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -129,6 +126,22 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
         setUpMapIfNeeded();
     }
 
+    static CameraPosition lastLocation = null;
+    static float lastZoom = -1.0f;
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mMap.clear();
+
+        lastLocation = mMap.getCameraPosition();
+        lastZoom = lastLocation.zoom;
+
+        mMap = null;
+        mLocationMarker = null;
+        mPolyLine = null;
+    }
+
     private SupportMapFragment getMapFragment() {
         FragmentManager fm;
 
@@ -154,7 +167,11 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
     }
 
     private void setUpMap() {
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(34.738, -92.894), 4.0f));
+        if (lastLocation != null) {
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(lastLocation));
+            lastLocation = null;
+        } else
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(34.738, -92.894), 4.0f));
     }
 
     @Override
@@ -175,7 +192,8 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
 
             if (mLocationMarker == null) {
                 mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Location").position(location).draggable(false));
-                cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), 12.0f);
+                cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), ((lastZoom > 0.0f) ? lastZoom : 12.0f));
+                lastZoom = -1.0f;
                 mMap.moveCamera(cameraUpdate);
             } else {
                 mLocationMarker.setPosition(location);

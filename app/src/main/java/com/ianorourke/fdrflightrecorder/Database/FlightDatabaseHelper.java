@@ -116,6 +116,36 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(AircraftTableValues.AIRCRAFT_TABLE_CREATE);
     }
 
+    public FlightRow getFlightRowForName(String flight_name) {
+        Cursor cursor = database.query(FlightTableValues.FLIGHT_TABLE,
+                new String[] {
+                        FlightTableValues.ID_COLUMN,
+                        FlightTableValues.FLIGHT_COLUMN,
+                        FlightTableValues.PILOT_COLUMN,
+                        FlightTableValues.PLANE_COLUMN,
+                        FlightTableValues.TAIL_COLUMN,
+                        FlightTableValues.PRESSURE_COLUMN,
+                        FlightTableValues.TEMPERATURE_COLUMN,
+                        FlightTableValues.PROGRESS_COLUMN},
+                FlightTableValues.FLIGHT_COLUMN + " = ?", new String[] {flight_name}, null, null, null);
+
+        assert cursor.getCount() <= 1;
+
+        if (cursor.getCount() == 0) return null;
+
+        FlightRow row = new FlightRow();
+        row._id = cursor.getLong(0);
+        row.flight_name = cursor.getString(1);
+        row.pilot = cursor.getString(2);
+        row.plane = cursor.getString(3);
+        row.tail_number = cursor.getString(4);
+        row.pressure = cursor.getString(5);
+        row.temperature = cursor.getString(6);
+        row.in_progress = cursor.getInt(7) != 0;
+
+        return row;
+    }
+
     public FlightDataLog getFlight(FlightRow flight) {
         Calendar calendar = GregorianCalendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));

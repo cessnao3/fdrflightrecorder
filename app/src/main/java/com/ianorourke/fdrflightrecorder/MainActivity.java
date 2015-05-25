@@ -17,7 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.ianorourke.fdrflightrecorder.Fragments.AircraftFragment;
-import com.ianorourke.fdrflightrecorder.Fragments.FragmentTag;
 import com.ianorourke.fdrflightrecorder.Fragments.NewRecordFlightFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.PrefsFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.RecordedFlightsFragment;
@@ -72,36 +71,29 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    static AircraftFragment mAircraftFragment;
-    static WeatherFragment mWeatherFragment;
-    static RecordedFlightsFragment mRecordedFragment;
-    static NewRecordFlightFragment mNewFlightFragment;
-    static PrefsFragment mPrefsFragment;
-
     private void setPosition(int position) {
         Fragment newFragment = null;
 
         if (position == getResources().getInteger(R.integer.nav_aircraft)) {
-            if (mAircraftFragment == null) mAircraftFragment = new AircraftFragment();
-            newFragment = mAircraftFragment;
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != AircraftFragment.class)
+                newFragment = new AircraftFragment();
         } else if (position == getResources().getInteger(R.integer.nav_weather)) {
-            if (mWeatherFragment == null) mWeatherFragment = new WeatherFragment();
-            newFragment = mWeatherFragment;
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != WeatherFragment.class)
+                newFragment = new WeatherFragment();
         } else if (position == getResources().getInteger(R.integer.nav_recorded)) {
-            if (mRecordedFragment == null) mRecordedFragment = new RecordedFlightsFragment();
-            newFragment = mRecordedFragment;
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != RecordedFlightsFragment.class)
+                newFragment = new RecordedFlightsFragment();
         } else if (position == getResources().getInteger(R.integer.nav_new)) {
-            if (mNewFlightFragment == null) mNewFlightFragment = new NewRecordFlightFragment();
-            newFragment = mNewFlightFragment;
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != NewRecordFlightFragment.class)
+                newFragment = new NewRecordFlightFragment();
         } else if (position == getResources().getInteger(R.integer.nav_settings)) {
-            if (mPrefsFragment == null) mPrefsFragment = new PrefsFragment();
-            newFragment = mPrefsFragment;
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != PrefsFragment.class)
+                newFragment = new PrefsFragment();
         }
 
-        if (newFragment != mCurrentFragment) {
+        if (newFragment != null) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
             ft.replace(mLinearLayout.getId(), newFragment);
-
             ft.commit();
 
             getSupportActionBar().setTitle(mNavigationActions[position]);
