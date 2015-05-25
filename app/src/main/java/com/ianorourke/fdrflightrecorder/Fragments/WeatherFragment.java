@@ -8,7 +8,12 @@ import android.view.ViewGroup;
 
 import com.ianorourke.fdrflightrecorder.R;
 
-public class WeatherFragment extends Fragment {
+public class WeatherFragment extends Fragment implements FragmentTag {
+
+    @Override
+    public String getFragmentTag() {
+        return "weather_fragment";
+    }
 
     public WeatherFragment() {
         // Required empty public constructor

@@ -3,8 +3,8 @@
     <string-array name="navigation_actions">
         <item>Aircraft</item>
         <item>Weather</item>
-        <item>Recorded Flights</item>
-        <item>New Flight</item>
+        <item>Flights</item>
+        <item>Record Flight</item>
         <item>Settings</item>
     </string-array>
 

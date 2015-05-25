@@ -12,7 +12,6 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,7 +31,12 @@ import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
 
-public class NewRecordFlightFragment extends Fragment implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
+public class NewRecordFlightFragment extends Fragment implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface, FragmentTag {
+    @Override
+    public String getFragmentTag() {
+        return "map_fragment";
+    }
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private Marker mLocationMarker;

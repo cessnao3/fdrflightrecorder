@@ -24,7 +24,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class AircraftFragment extends Fragment {
+public class AircraftFragment extends Fragment implements FragmentTag {
+
+    @Override
+    public String getFragmentTag() {
+        return "aircraft_fragment";
+    }
 
     FloatingActionButton floatingActionButton;
     ArrayList<AircraftRow> aircraftRows;

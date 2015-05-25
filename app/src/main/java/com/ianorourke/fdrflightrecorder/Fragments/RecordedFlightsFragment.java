@@ -24,7 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class RecordedFlightsFragment extends Fragment {
+public class RecordedFlightsFragment extends Fragment implements FragmentTag {
+    @Override
+    public String getFragmentTag() {
+        return "recorded_flights_fragment";
+    }
 
     private static String[] RECORDED_MENU_OPTIONS = {"Export Flight", "Delete Flight"};
 

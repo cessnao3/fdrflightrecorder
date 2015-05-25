@@ -24,6 +24,7 @@ import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
 import com.ianorourke.fdrflightrecorder.Fragments.NewRecordFlightFragment;
+import com.ianorourke.fdrflightrecorder.MainActivity;
 import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
 import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
@@ -123,6 +124,9 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         String pilot = intent.getStringExtra(getString(R.string.service_pilot_name));
         if (pilot == null) pilot = "";
 
+        String plane_type = intent.getStringExtra(getString(R.string.service_plane_type));
+        String plane_tail = intent.getStringExtra(getString(R.string.service_plane_tail));
+
         soundStart = new SoundStart(MIN_AMPLITUDE, NUM_HOLD_SECONDS, this);
 
         // Checking if Null
@@ -142,7 +146,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         wakeLock.acquire();
 
         // Notification
-        Intent viewIntent = new Intent(this, NewRecordFlightFragment.class);
+        Intent viewIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
 
         notificationBuilder = new Notification.Builder(getApplicationContext());
@@ -160,7 +164,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         databaseHelper = FlightDatabaseHelper.getInstance(getApplicationContext());
         databaseHelper.markAllFlightsCompleted();
 
-        flightLog = new FlightDataLog(pilot, "Cessna 172", "N755PR", "29.92", "14", zuluTime);
+        flightLog = new FlightDataLog(pilot, plane_type, plane_tail, "29.92", "14", zuluTime);
 
         flightEvent = new FlightDataEvent();
 

@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.ianorourke.fdrflightrecorder.Fragments.AircraftFragment;
+import com.ianorourke.fdrflightrecorder.Fragments.FragmentTag;
 import com.ianorourke.fdrflightrecorder.Fragments.NewRecordFlightFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.PrefsFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.RecordedFlightsFragment;
@@ -71,11 +72,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    AircraftFragment mAircraftFragment;
-    WeatherFragment mWeatherFragment;
-    RecordedFlightsFragment mRecordedFragment;
-    NewRecordFlightFragment mNewFlightFragment;
-    PrefsFragment mPrefsFragment;
+    static AircraftFragment mAircraftFragment;
+    static WeatherFragment mWeatherFragment;
+    static RecordedFlightsFragment mRecordedFragment;
+    static NewRecordFlightFragment mNewFlightFragment;
+    static PrefsFragment mPrefsFragment;
 
     private void setPosition(int position) {
         Fragment newFragment = null;
@@ -100,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         if (newFragment != mCurrentFragment) {
             FragmentTransaction ft = mFragmentManager.beginTransaction();
             ft.replace(mLinearLayout.getId(), newFragment);
+
             ft.commit();
 
             getSupportActionBar().setTitle(mNavigationActions[position]);
