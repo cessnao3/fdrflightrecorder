@@ -47,4 +47,15 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="Application Settings">
+
+        <CheckBoxPreference
+            android:key="@string/pref_show_new_flight_alert"
+            android:title="Show Orientation Alert"
+            android:summary="Shows the Phone Orientation Instructions before New Flight"
+            android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -92,7 +93,8 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
                     }
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle("Record New Flight")
+                    final AlertDialog newFlightDialog = builder
+                            .setTitle("Select Aircraft for Flight")
                             .setItems(aircraftItems, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -106,7 +108,28 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
                                 }
                             })
                             .setCancelable(true)
-                            .create().show();
+                            .create();
+
+                    boolean shouldShowAlert = sharedPreferences.getBoolean(getString(R.string.pref_show_new_flight_alert), true);
+
+                    if (shouldShowAlert) {
+                        View alert_view = getActivity().getLayoutInflater().inflate(R.layout.alert_new_flight, null);
+                        final CheckBox newBox = (CheckBox) alert_view.findViewById(R.id.checkbox_orientation_alert);
+
+                        AlertDialog.Builder orientation_builder = new AlertDialog.Builder(getActivity());
+                        orientation_builder
+                                .setTitle("Phone Orientation")
+                                .setView(alert_view)
+                                .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        sharedPreferences.edit().putBoolean(getString(R.string.pref_show_new_flight_alert), newBox.isChecked()).apply();
+                                        dialog.dismiss();
+                                        newFlightDialog.show();
+                                    }
+                                }).create().show();
+                    } else
+                        newFlightDialog.show();
 
                     //getActivity().startService(serviceIntent);
                 }

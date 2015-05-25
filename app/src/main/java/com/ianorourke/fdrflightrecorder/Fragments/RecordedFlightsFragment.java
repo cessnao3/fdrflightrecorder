@@ -19,6 +19,7 @@ import com.ianorourke.fdrflightrecorder.FlightFormatters.WriteLog;
 import com.ianorourke.fdrflightrecorder.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -93,6 +94,7 @@ public class RecordedFlightsFragment extends Fragment {
 
     public void UpdateLists() {
         List<FlightRow> newRows = FlightDatabaseHelper.getInstance(getActivity().getApplicationContext()).getFlightList();
+        Collections.reverse(newRows);
 
         flightRows.clear();
         flightData.clear();

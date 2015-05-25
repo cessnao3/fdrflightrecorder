@@ -19,6 +19,7 @@ import com.ianorourke.fdrflightrecorder.R;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -122,6 +123,7 @@ public class AircraftFragment extends Fragment {
 
     public void UpdateLists() {
         List<AircraftRow> newRows = FlightDatabaseHelper.getInstance(getActivity().getApplicationContext()).getAllAircraft();
+        Collections.sort(newRows);
 
         aircraftRows.clear();
         aircraftData.clear();
