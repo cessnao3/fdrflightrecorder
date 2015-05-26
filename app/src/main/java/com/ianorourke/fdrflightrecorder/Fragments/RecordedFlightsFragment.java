@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class RecordedFlightsFragment extends Fragment {
 
-    private static String[] RECORDED_MENU_OPTIONS = {"Export Flight", "Delete Flight"};
+    private static String[] RECORDED_MENU_OPTIONS = {"Export Flight as FDR", "Delete Flight"};
 
     ArrayList<FlightRow> flightRows;
     ArrayList<Map<String, String>> flightData;
@@ -69,10 +69,9 @@ public class RecordedFlightsFragment extends Fragment {
                                         FDRFormatter fdrFormatter = new FDRFormatter();
                                         WriteLog.saveLog(getActivity(), databaseHelper.getFlight(flightRows.get(position)), fdrFormatter);
                                     } else if (which == 1) {
-                                            databaseHelper.removeFlight(flightRows.get(position));
-
-                                            UpdateLists();
-                                        }
+                                        databaseHelper.removeFlight(flightRows.get(position));
+                                        UpdateLists();
+                                    }
                                     }
                                 })
                         .setCancelable(true)
@@ -120,11 +119,9 @@ public class RecordedFlightsFragment extends Fragment {
                 getActivity(),
                 flightData,
                 android.R.layout.simple_list_item_2,
-                new String[] {"title", "subtitle"},
-                new int[] {android.R.id.text1, android.R.id.text2});
+                new String[]{"title", "subtitle"},
+                new int[]{android.R.id.text1, android.R.id.text2});
 
         listView.setAdapter(adapter);
     }
-
-
 }

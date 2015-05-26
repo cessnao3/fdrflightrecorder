@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ianorourke.fdrflightrecorder.R;
+import com.ianorourke.fdrflightrecorder.Weather.METARRetriever;
 
 public class WeatherFragment extends Fragment {
 
@@ -24,5 +25,12 @@ public class WeatherFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_weather, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        new METARRetriever.GetMetarAsync().execute(null, null, null);
     }
 }
