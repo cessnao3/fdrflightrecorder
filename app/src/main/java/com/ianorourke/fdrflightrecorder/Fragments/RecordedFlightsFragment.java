@@ -63,14 +63,24 @@ public class RecordedFlightsFragment extends Fragment {
                 builder.setItems(RECORDED_MENU_OPTIONS, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    FlightDatabaseHelper databaseHelper = FlightDatabaseHelper.getInstance(getActivity().getApplicationContext());
+                                    final FlightDatabaseHelper databaseHelper = FlightDatabaseHelper.getInstance(getActivity().getApplicationContext());
 
                                     if (which == 0) {
                                         FDRFormatter fdrFormatter = new FDRFormatter();
                                         WriteLog.saveLog(getActivity(), databaseHelper.getFlight(flightRows.get(position)), fdrFormatter);
                                     } else if (which == 1) {
-                                        databaseHelper.removeFlight(flightRows.get(position));
-                                        UpdateLists();
+                                        AlertDialog.Builder areYouSure = new AlertDialog.Builder(getActivity());
+
+                                        areYouSure.setTitle("Confirm Delete")
+                                                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        databaseHelper.removeFlight(flightRows.get(position));
+                                                        UpdateLists();
+                                                    }
+                                                })
+                                                .setNegativeButton("Cancel", null)
+                                                .create().show();
                                     }
                                     }
                                 })

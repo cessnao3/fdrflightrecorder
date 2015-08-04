@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weather_pref_file">prefs_weather</string>
+
+    <string name="weather_last_raw">weather_last_raw</string>
+    <string name="weather_last_station">weather_last_station</string>
+    <string name="weather_last_observation_time">weather_last_observation_time</string>
+    <string name="weather_last_temp_c">weather_last_temp_c</string>
+    <string name="weather_last_dewpoint_c">weather_last_dewpoint_c</string>
+    <string name="weather_last_wind_dir">weather_last_wind_dir</string>
+    <string name="weather_last_wind_speed_kt">weather_last_wind_speed_kt</string>
+    <string name="weather_last_wind_gust_kt">weather_last_wind_gust_kt</string>
+    <string name="weather_last_visibility_smi">weather_last_visibility_smi</string>
+    <string name="weather_last_pressure">weather_last_pressure</string>
+</resources>

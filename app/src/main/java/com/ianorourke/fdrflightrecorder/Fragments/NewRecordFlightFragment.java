@@ -40,8 +40,6 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
     private Marker mLocationMarker;
     private Polyline mPolyLine;
 
-    private static ArrayList<LatLng> markerPoints = new ArrayList<>();
-
     private FloatingActionButton startStopButton;
 
     @Override
@@ -72,7 +70,7 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
                 if (BackgroundLocationService.isRunning()) {
                     getActivity().stopService(serviceIntent);
                 } else {
-                    markerPoints.clear();
+                    MapReceiver.markerPoints.clear();
 
                     mMap.clear();
 
@@ -158,7 +156,9 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
         mMap.clear();
 
         lastLocation = mMap.getCameraPosition();
-        lastZoom = lastLocation.zoom;
+
+        if (BackgroundLocationService.isRunning())
+            lastZoom = lastLocation.zoom;
 
         mMap = null;
         mLocationMarker = null;
@@ -224,12 +224,10 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
                 mMap.animateCamera(cameraUpdate);
             }
 
-            markerPoints.add(location);
-
             if (mPolyLine == null) {
-                mPolyLine = mMap.addPolyline(new PolylineOptions().addAll(markerPoints).width(12.0f));
+                mPolyLine = mMap.addPolyline(new PolylineOptions().addAll(MapReceiver.markerPoints).width(12.0f));
             } else {
-                mPolyLine.setPoints(markerPoints);
+                mPolyLine.setPoints(MapReceiver.markerPoints);
             }
         }
     }
