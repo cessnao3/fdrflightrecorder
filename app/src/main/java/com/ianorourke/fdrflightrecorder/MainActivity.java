@@ -31,15 +31,15 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout mLinearLayout;
     private Fragment mCurrentFragment;
 
-    private FragmentManager mFragmentManager;
+        private FragmentManager mFragmentManager;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
 
-        mLinearLayout = (LinearLayout) findViewById(R.id.main_layout);
-        mFragmentManager = getSupportFragmentManager();
+            mLinearLayout = (LinearLayout) findViewById(R.id.main_layout);
+            mFragmentManager = getSupportFragmentManager();
 
         addDrawerItems();
         setupDrawer();
