@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
 import com.ianorourke.fdrflightrecorder.Database.FlightRow;
+import com.ianorourke.fdrflightrecorder.FlightFormatters.CSVFormatter;
 import com.ianorourke.fdrflightrecorder.FlightFormatters.FDRFormatter;
 import com.ianorourke.fdrflightrecorder.FlightFormatters.WriteLog;
 import com.ianorourke.fdrflightrecorder.R;
@@ -27,7 +28,10 @@ import java.util.Map;
 
 public class RecordedFlightsFragment extends Fragment {
 
-    private static String[] RECORDED_MENU_OPTIONS = {"Export Flight as FDR", "Delete Flight"};
+    private static String[] RECORDED_MENU_OPTIONS = {
+            "Export Flight as FDR",
+            "Export Flight as CSV",
+            "Delete Flight"};
 
     ArrayList<FlightRow> flightRows;
     ArrayList<Map<String, String>> flightData;
@@ -69,6 +73,9 @@ public class RecordedFlightsFragment extends Fragment {
                                         FDRFormatter fdrFormatter = new FDRFormatter();
                                         WriteLog.saveLog(getActivity(), databaseHelper.getFlight(flightRows.get(position)), fdrFormatter);
                                     } else if (which == 1) {
+                                        CSVFormatter csvFormatter = new CSVFormatter();
+                                        WriteLog.saveLog(getActivity(), databaseHelper.getFlight(flightRows.get(position)), csvFormatter);
+                                    } else if (which == 2) {
                                         AlertDialog.Builder areYouSure = new AlertDialog.Builder(getActivity());
 
                                         areYouSure.setTitle("Confirm Delete")
