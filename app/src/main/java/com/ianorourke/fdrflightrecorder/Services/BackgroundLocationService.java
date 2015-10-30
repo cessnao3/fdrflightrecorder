@@ -88,11 +88,14 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     private final int NOTIFICATION_ID = 101;
     private final float METERS_TO_FEET = 3.28f;
+    private final float METERS_SECONDS_TO_KNOTS = 1.94384f;
 
     private boolean soundStartEnabled;
     private boolean soundStopEnabled;
 
     private FlightDatabaseHelper databaseHelper;
+
+    private boolean hasNewValue = true;
 
     @Override
     public void onCreate() {
@@ -215,14 +218,18 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
                 flightEvent.setSeconds(seconds);
 
-                flightLog.addFlightDataEvent(flightEvent);
-                databaseHelper.addEventToFlight(flightLog.getName(), flightEvent);
+                if (hasNewValue) {
+                    flightLog.addFlightDataEvent(flightEvent);
+                    databaseHelper.addEventToFlight(flightLog.getName(), flightEvent);
 
-                Intent intent = new Intent();
-                intent.setAction(getString(R.string.map_intent));
-                intent.putExtra(getString(R.string.map_lat), currentLoc.latitude);
-                intent.putExtra(getString(R.string.map_lon), currentLoc.longitude);
-                sendBroadcast(intent);
+                    Intent intent = new Intent();
+                    intent.setAction(getString(R.string.map_intent));
+                    intent.putExtra(getString(R.string.map_lat), currentLoc.latitude);
+                    intent.putExtra(getString(R.string.map_lon), currentLoc.longitude);
+                    sendBroadcast(intent);
+
+                    hasNewValue = false;
+                }
             }
         }, 0, timeInterval);
     }
@@ -247,6 +254,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         flightEvent.setLon(currentLoc.longitude);
         flightEvent.setAltitude((int) (location.getAltitude() * METERS_TO_FEET));
         flightEvent.setHeading((int) location.getBearing());
+        flightEvent.setGroundSpeed((int) (location.getSpeed() * METERS_SECONDS_TO_KNOTS));
 
         float accuracy = location.getAccuracy() * METERS_TO_FEET;
 
@@ -256,6 +264,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             notificationBuilder.setContentText("Accuracy: " + ((int) accuracy) + " Feet");
         }
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+
+        hasNewValue = true;
     }
 
     @Override

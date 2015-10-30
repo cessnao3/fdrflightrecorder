@@ -60,6 +60,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         public static final String LAT_COLUMN = "latitude";
         public static final String LON_COLUMN = "longitude";
         public static final String ALT_COLUMN = "msl_altitude";
+        public static final String SPEED_COLUMN = "ground_speed";
         public static final String HEADING_COLUMN = "heading";
         public static final String PITCH_COLUMN = "pitch";
         public static final String ROLL_COLUMN = "roll";
@@ -71,6 +72,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
                     + LAT_COLUMN + REAL_DT + COMMA_SEP
                     + LON_COLUMN + REAL_DT + COMMA_SEP
                     + ALT_COLUMN + INTEGER_DT + COMMA_SEP
+                    + SPEED_COLUMN + INTEGER_DT + COMMA_SEP
                     + HEADING_COLUMN + INTEGER_DT + COMMA_SEP
                     + PITCH_COLUMN + REAL_DT + COMMA_SEP
                     + ROLL_COLUMN + REAL_DT
@@ -165,6 +167,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
                         LogTableValues.LAT_COLUMN,
                         LogTableValues.LON_COLUMN,
                         LogTableValues.ALT_COLUMN,
+                        LogTableValues.SPEED_COLUMN,
                         LogTableValues.HEADING_COLUMN,
                         LogTableValues.PITCH_COLUMN,
                         LogTableValues.ROLL_COLUMN},
@@ -177,9 +180,10 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
             event.setLat(cursor.getDouble(1));
             event.setLon(cursor.getDouble(2));
             event.setAltitude(cursor.getInt(3));
-            event.setHeading(cursor.getInt(4));
-            event.setPitch(cursor.getDouble(5));
-            event.setRoll(cursor.getDouble(6));
+            event.setGroundSpeed(cursor.getInt(4));
+            event.setHeading(cursor.getInt(5));
+            event.setPitch(cursor.getDouble(6));
+            event.setRoll(cursor.getDouble(7));
 
             dataLog.addFlightDataEvent(event);
         }
@@ -284,6 +288,7 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         logValues.put(LogTableValues.LAT_COLUMN, event.getLat());
         logValues.put(LogTableValues.LON_COLUMN, event.getLon());
         logValues.put(LogTableValues.ALT_COLUMN, event.getAltitude());
+        logValues.put(LogTableValues.SPEED_COLUMN, event.getGroundSpeed());
         logValues.put(LogTableValues.HEADING_COLUMN, event.getHeading());
         logValues.put(LogTableValues.PITCH_COLUMN, event.getPitch());
         logValues.put(LogTableValues.ROLL_COLUMN, event.getRoll());

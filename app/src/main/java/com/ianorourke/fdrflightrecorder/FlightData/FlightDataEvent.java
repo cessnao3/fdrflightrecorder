@@ -7,6 +7,8 @@ public class FlightDataEvent {
     double lat = 0.0;
     int mslHeight = 0;
 
+    int groundSpeed = 0;
+
     int heading = 0;
     double pitch = 0.0;
     double roll = 0.0;
@@ -23,6 +25,7 @@ public class FlightDataEvent {
         this.heading = event.heading;
         this.pitch = event.pitch;
         this.roll = event.roll;
+        this.groundSpeed = event.groundSpeed;
     }
 
     public void setSeconds(double s) {
@@ -55,6 +58,14 @@ public class FlightDataEvent {
 
     public int getAltitude() {
         return mslHeight;
+    }
+
+    public void setGroundSpeed(int gs) {
+        groundSpeed = gs;
+    }
+
+    public int getGroundSpeed() {
+        return groundSpeed;
     }
 
     public void setHeading(int h) {
