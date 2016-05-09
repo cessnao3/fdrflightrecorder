@@ -12,6 +12,9 @@ import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Weather.GetMetarAsync;
 import com.ianorourke.fdrflightrecorder.Weather.Metar;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyncInterface {
 
     public WeatherFragment() {
@@ -31,8 +34,18 @@ public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyn
     }
 
     public void metarReceived(Metar metar) {
-        if (metar != null)
+        if (metar != null) {
             ((TextView) getView().findViewById(R.id.weather_raw_view)).setText(metar.raw);
+
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("MMMM dd HH:mm 'Z'");
+            dateFormatter.setTimeZone(metar.getMetarTime().getTimeZone());
+            Calendar currentTime = Calendar.getInstance();
+
+            long timeDifference = currentTime.getTimeInMillis() - metar.getMetarTime().getTimeInMillis();
+            int timeDifferenceMinutes = (int) (timeDifference / 1000) / 60;
+
+            ((TextView) getView().findViewById(R.id.weather_time)).setText(getString(R.string.weather_time_label) + " " + dateFormatter.format(metar.getMetarTime().getTime()) + " (" + timeDifferenceMinutes + " min ago)");
+        }
 
         Log.v("FDR", "Time: " + metar.getMetarTime());
     }
@@ -41,7 +54,8 @@ public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyn
     public void onResume() {
         super.onResume();
 
-        ((TextView) getView().findViewById(R.id.weather_raw_view)).setText(GetMetarAsync.GetLatestMetar(getActivity()).raw);
+        Metar latestMetar = GetMetarAsync.GetLatestMetar(getActivity());
+        metarReceived((latestMetar));
 
         new GetMetarAsync(getActivity(), this).execute();
     }
