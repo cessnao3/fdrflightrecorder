@@ -30,6 +30,7 @@ public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyn
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        new GetMetarAsync(getActivity(), this).execute();
         return inflater.inflate(R.layout.fragment_weather, container, false);
     }
 
@@ -37,17 +38,17 @@ public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyn
         if (metar != null) {
             ((TextView) getView().findViewById(R.id.weather_raw_view)).setText(metar.raw);
 
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("MMMM dd HH:mm 'Z'");
-            dateFormatter.setTimeZone(metar.getMetarTime().getTimeZone());
-            Calendar currentTime = Calendar.getInstance();
+            if (metar.getMetarTime() != null) {
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("MMMM dd, HH:mm 'Z'");
+                dateFormatter.setTimeZone(metar.getMetarTime().getTimeZone());
 
-            long timeDifference = currentTime.getTimeInMillis() - metar.getMetarTime().getTimeInMillis();
-            int timeDifferenceMinutes = (int) (timeDifference / 1000) / 60;
+                ((TextView) getView().findViewById(R.id.weather_time)).setText(getString(R.string.weather_time_label) + dateFormatter.format(metar.getMetarTime().getTime()) + " (" + metar.MinutesSinceUpdate() + " min ago)");
+            } else {
+                ((TextView) getView().findViewById(R.id.weather_time)).setText(getString(R.string.weather_time_label) + "Not Available");
+            }
 
-            ((TextView) getView().findViewById(R.id.weather_time)).setText(getString(R.string.weather_time_label) + " " + dateFormatter.format(metar.getMetarTime().getTime()) + " (" + timeDifferenceMinutes + " min ago)");
+            ((TextView) getView().findViewById(R.id.weather_wind)).setText(getString(R.string.weather_wind_label) + metar.wind_speed_kt + " " + ((metar.wind_speed_kt == 1) ? "kt" : "kts") + " from " + metar.wind_dir + ((metar.wind_gust_kt != 0) ? " gusting to " + metar.wind_gust_kt + ((metar.wind_gust_kt == 1) ? "kt" : "kts") : ""));
         }
-
-        Log.v("FDR", "Time: " + metar.getMetarTime());
     }
 
     @Override

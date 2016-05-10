@@ -25,18 +25,20 @@ public class Metar {
         return null;
     }
 
+    public final static int METAR_TIME_ERROR = -10;
+
     public final String raw;
     public final String station;
     public final String observation_time;
-    public final String temp_c;
-    public final String dewpoint_c;
-    public final String wind_dir;
-    public final String wind_speed_kt;
-    public final String wind_gust_kt;
-    public final String visibility_smi;
-    public final String pressure;
+    public final double temp_c;
+    public final double dewpoint_c;
+    public final int wind_dir;
+    public final int wind_speed_kt;
+    public final int wind_gust_kt;
+    public final double visibility_smi;
+    public final double pressure;
 
-    public Metar(String raw, String station, String observation_time, String temp_c, String dewpoint_c, String wind_dir, String wind_speed_kt, String wind_gust_kt, String visibility_smi, String pressure) {
+    public Metar(String raw, String station, String observation_time, double temp_c, double dewpoint_c, int wind_dir, int wind_speed_kt, int wind_gust_kt, double visibility_smi, double pressure) {
         this.raw = raw;
         this.station = station;
         this.observation_time = observation_time;
@@ -49,5 +51,17 @@ public class Metar {
         this.pressure = pressure;
 
         //Log.v("FDR", "SUCCESS!");
+    }
+
+    public int MinutesSinceUpdate() {
+        if (getMetarTime() == null) return METAR_TIME_ERROR;
+
+        Calendar currentTime = Calendar.getInstance();
+        currentTime.setTimeZone(getMetarTime().getTimeZone());
+
+        //TOOD: Fix Time Bug
+
+        long timeDifference = currentTime.getTimeInMillis() - getMetarTime().getTimeInMillis();
+        return (int) (timeDifference / 1000) / 60;
     }
 }

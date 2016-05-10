@@ -23,4 +23,11 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/weather_time_label"
         android:id="@+id/weather_time" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/weather_wind_label"
+        android:id="@+id/weather_wind" />
 </LinearLayout>

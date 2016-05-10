@@ -1,5 +1,6 @@
 package com.ianorourke.fdrflightrecorder.Weather;
 
+import android.text.Html;
 import android.util.Log;
 import android.util.Xml;
 
@@ -18,8 +19,6 @@ public class MetarRetriever {
     public Metar getLatestMETARReport(String urlString) {
         Metar tempMetar = null;
 
-        Log.v("FDR", urlString);
-
         try {
             URL url = new URL(urlString);
 
@@ -27,7 +26,7 @@ public class MetarRetriever {
 
             httpConnection.setRequestMethod("GET");
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream(), "UTF-8"));
 
             try {
                 tempMetar = parseWithXmlBuffer(reader);
@@ -38,10 +37,9 @@ public class MetarRetriever {
             httpConnection.getInputStream().close();
             httpConnection.disconnect();
         } catch (Exception e) {
-            Log.v("FDR", e.toString());
+            e.printStackTrace();
         }
 
-        Log.v("FDR", tempMetar.toString());
         return tempMetar;
     }
 
@@ -104,8 +102,8 @@ public class MetarRetriever {
                     visibility_smi.append(text);
                 else if (startTag.equalsIgnoreCase(METAR_TAGS.ALTIM_IN_HG))
                     pressure.append(text);
-                else;
-                    //Log.v("FDR", "Extra Tag: " + startTag);
+                else ;
+                //Log.v("FDR", "Extra Tag: " + startTag);
             } else if (eventType == XmlPullParser.END_TAG) {
                 if (xmlParser.getName().equalsIgnoreCase("METAR")) break;
             }
@@ -113,17 +111,53 @@ public class MetarRetriever {
             eventType = xmlParser.next();
         }
 
+        String rawString = raw.toString().trim();
+        String stationString = station.toString().trim();
+        String obvservTime = observation_time.toString().trim();
+
+        double temp_c_i = toDouble(temp_c.toString().trim());
+        double dewpoint_c_i = toDouble(dewpoint_c.toString().trim());
+        int wind_dir_i = toInt(wind_dir.toString().trim());
+        int wind_speed_i = toInt(wind_speed_kt.toString().trim());
+        int wind_gust_i = toInt(wind_gust_kt.toString().trim());
+        double vis_i = toDouble(visibility_smi.toString().trim());
+        double press_i = toDouble(pressure.toString().trim());
+
         return new Metar(
-                raw.toString(),
-                station.toString(),
-                observation_time.toString(),
-                temp_c.toString(),
-                dewpoint_c.toString(),
-                wind_dir.toString(),
-                wind_speed_kt.toString(),
-                wind_gust_kt.toString(),
-                visibility_smi.toString(),
-                pressure.toString()
+                rawString,
+                stationString,
+                obvservTime,
+                temp_c_i,
+                dewpoint_c_i,
+                wind_dir_i,
+                wind_speed_i,
+                wind_gust_i,
+                vis_i,
+                press_i
         );
+    }
+
+    private static double toDouble(String s) {
+        double d = 0.0;
+
+        try {
+            d = Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            // Do Nothing
+        }
+
+        return d;
+    }
+
+    private static int toInt(String s) {
+        int i = 0;
+
+        try {
+            i = Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            // Do Nothing
+        }
+
+        return i;
     }
 }

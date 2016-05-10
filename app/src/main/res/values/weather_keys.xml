@@ -3,7 +3,8 @@
     <string name="weather_pref_file">prefs_weather</string>
 
     <string name="weather_raw_label">Current Raw METAR</string>
-    <string name="weather_time_label">Time:</string>
+    <string name="weather_time_label">Time: </string>
+    <string name="weather_wind_label">Wind: </string>
 
     <string name="weather_last_raw">weather_last_raw</string>
     <string name="weather_last_station">weather_last_station</string>
