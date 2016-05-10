@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/weather_raw_label"
-        android:id="@+id/weather_raw_view" />
+        android:id="@+id/weather_raw" />
 
     <TextView
         android:layout_width="wrap_content"

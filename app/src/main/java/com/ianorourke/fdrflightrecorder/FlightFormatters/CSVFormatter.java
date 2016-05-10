@@ -3,6 +3,8 @@ package com.ianorourke.fdrflightrecorder.FlightFormatters;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 
+import java.util.Locale;
+
 public class CSVFormatter implements FlightFormatter {
     public final static  String FILE_EXT = ".csv";
 
@@ -36,10 +38,10 @@ public class CSVFormatter implements FlightFormatter {
         builder.append(event.getHeading());
         builder.append(',');
 
-        builder.append(String.format("%.2f", event.getPitch()));
+        builder.append(String.format(Locale.US, "%.2f", event.getPitch()));
         builder.append(',');
 
-        builder.append(String.format("%.2f", event.getRoll()));
+        builder.append(String.format(Locale.US, "%.2f", event.getRoll()));
         builder.append('\n');
     }
 }

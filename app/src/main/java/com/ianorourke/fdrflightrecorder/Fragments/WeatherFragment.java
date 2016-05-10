@@ -14,6 +14,7 @@ import com.ianorourke.fdrflightrecorder.Weather.Metar;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyncInterface {
 
@@ -36,18 +37,52 @@ public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyn
 
     public void metarReceived(Metar metar) {
         if (metar != null) {
-            ((TextView) getView().findViewById(R.id.weather_raw_view)).setText(metar.raw);
+            // Set the Raw METER View Screen
 
-            if (metar.getMetarTime() != null) {
-                SimpleDateFormat dateFormatter = new SimpleDateFormat("MMMM dd, HH:mm 'Z'");
-                dateFormatter.setTimeZone(metar.getMetarTime().getTimeZone());
+            TextView weatherView;
 
-                ((TextView) getView().findViewById(R.id.weather_time)).setText(getString(R.string.weather_time_label) + dateFormatter.format(metar.getMetarTime().getTime()) + " (" + metar.MinutesSinceUpdate() + " min ago)");
-            } else {
-                ((TextView) getView().findViewById(R.id.weather_time)).setText(getString(R.string.weather_time_label) + "Not Available");
+            try {
+                weatherView = (TextView) getView().findViewById(R.id.weather_raw);
+            } catch (NullPointerException e) {
+                weatherView = null;
             }
 
-            ((TextView) getView().findViewById(R.id.weather_wind)).setText(getString(R.string.weather_wind_label) + metar.wind_speed_kt + " " + ((metar.wind_speed_kt == 1) ? "kt" : "kts") + " from " + metar.wind_dir + ((metar.wind_gust_kt != 0) ? " gusting to " + metar.wind_gust_kt + ((metar.wind_gust_kt == 1) ? "kt" : "kts") : ""));
+            if (weatherView != null) {
+                weatherView.setText(metar.raw);
+            }
+
+            // Set the Time View Display
+
+            TextView timeView = (TextView) getView().findViewById(R.id.weather_time);
+
+            if (timeView != null) {
+                if (metar.getMetarTime() != null) {
+                    SimpleDateFormat dateFormatter = new SimpleDateFormat("MMMM dd, HH:mm 'Z'", Locale.US);
+                    dateFormatter.setTimeZone(metar.getMetarTime().getTimeZone());
+
+                    String dateString = getString(R.string.weather_time_label) + " ";
+                    dateString += dateFormatter.format(metar.getMetarTime().getTime());
+                    dateString += " (" + metar.MinutesSinceUpdate() + " min ago)";
+
+                    timeView.setText(dateString);
+                } else {
+                    String timeNotAvailable = getString(R.string.weather_time_label) + "Not Available";
+                    timeView.setText(timeNotAvailable);
+                }
+            }
+
+            // Set the Wind Display
+            TextView windView = (TextView) getView().findViewById(R.id.weather_wind);
+
+            if (windView != null) {
+                String windString = "";
+                windString += (getString(R.string.weather_wind_label)) + " ";
+                windString += metar.wind_speed_kt + " " + ((metar.wind_speed_kt == 1) ? "kt" : "kts");
+                windString += " from " + ((metar.wind_dir < 100) ? "0" : "") + ((metar.wind_dir < 10) ? "0" : "") + metar.wind_dir;
+                windString += (((metar.wind_gust_kt != 0) ? " gusting to " + metar.wind_gust_kt + ((metar.wind_gust_kt == 1) ? "kt" : "kts") : ""));
+
+                windView.setText(windString);
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class FDRFormatter implements FlightFormatter {
@@ -18,14 +19,14 @@ public class FDRFormatter implements FlightFormatter {
         logBuffer.append('\n');
 
         logBuffer.append("COMM, This FDR File was created by FDR Flight Recorder\n");
-        if (data.getPilot() != null && data.getPilot() != "") logBuffer.append("COMM, Pilot: " + data.getPilot() + "\n");
-        if (data.getPlane() != null && data.getPlane() != "") logBuffer.append("COMM, Aircraft: " + data.getPlane() + "\n");
+        if (data.getPilot() != null && !data.getPilot().isEmpty()) logBuffer.append("COMM, Pilot: " + data.getPilot() + "\n");
+        if (data.getPlane() != null && !data.getPlane().isEmpty()) logBuffer.append("COMM, Aircraft: " + data.getPlane() + "\n");
         logBuffer.append('\n');
 
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
         dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss", Locale.US);
         timeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         String formattedDate = dateFormatter.format(data.getTime().getTime());
@@ -34,9 +35,9 @@ public class FDRFormatter implements FlightFormatter {
         logBuffer.append("DATE," + formattedDate + ",\n");
         logBuffer.append("TIME," + formattedTime + ",\n");
 
-        if (data.getTail() != null && data.getTail() != "") logBuffer.append("TAIL," + data.getTail() + ",\n");
-        if (data.getPressure() != null && data.getPressure() != "") logBuffer.append("PRES," + data.getPressure() + ",\n");
-        if (data.getTemperature() != null && data.getTemperature() != "") logBuffer.append("TEMP," + data.getTemperature() + ",\n");
+        if (data.getTail() != null && !data.getTail().isEmpty()) logBuffer.append("TAIL," + data.getTail() + ",\n");
+        if (data.getPressure() != null && !data.getPressure().isEmpty()) logBuffer.append("PRES," + data.getPressure() + ",\n");
+        if (data.getTemperature() != null && !data.getTemperature().isEmpty()) logBuffer.append("TEMP," + data.getTemperature() + ",\n");
 
         logBuffer.append('\n');
 
@@ -67,10 +68,10 @@ public class FDRFormatter implements FlightFormatter {
         //Radar Height, Aileron Ratio, Elevator Ratio, Rudder Ratio
         builder.append("0,0,0,0,");
 
-        builder.append(String.format("%.2f", event.getPitch()));
+        builder.append(String.format(Locale.US, "%.2f", event.getPitch()));
         builder.append(',');
 
-        builder.append(String.format("%.2f", event.getRoll()));
+        builder.append(String.format(Locale.US, "%.2f", event.getRoll()));
         builder.append(',');
 
         builder.append(event.getHeading());

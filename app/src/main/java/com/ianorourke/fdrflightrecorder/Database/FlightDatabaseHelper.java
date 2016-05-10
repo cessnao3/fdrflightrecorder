@@ -131,9 +131,10 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
                         FlightTableValues.PROGRESS_COLUMN},
                 FlightTableValues.FLIGHT_COLUMN + " = ?", new String[] {flight_name}, null, null, null);
 
-        assert cursor.getCount() <= 1;
-
-        if (cursor.getCount() == 0) return null;
+        if (cursor.getCount() == 0) {
+            if (!cursor.isClosed()) cursor.close();
+            return null;
+        }
 
         FlightRow row = new FlightRow();
         row._id = cursor.getLong(0);
@@ -144,6 +145,8 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         row.pressure = cursor.getString(5);
         row.temperature = cursor.getString(6);
         row.in_progress = cursor.getInt(7) != 0;
+
+        if (!cursor.isClosed()) cursor.close();
 
         return row;
     }
@@ -303,7 +306,10 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
                             new String[] {tail},
                             null, null, null);
 
-        if (cursor.getCount() > 0) return false;
+        if (cursor.getCount() > 0) {
+            if (!cursor.isClosed()) cursor.close();
+            return false;
+        }
 
         ContentValues aircraftValues = new ContentValues();
 
@@ -311,6 +317,8 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
         aircraftValues.put(AircraftTableValues.TAIL_COLUMN, tail);
 
         database.insert(AircraftTableValues.TABLE_NAME, null, aircraftValues);
+
+        if (!cursor.isClosed()) cursor.close();
 
         return true;
     }
@@ -345,6 +353,8 @@ public class FlightDatabaseHelper extends SQLiteOpenHelper {
 
             ret.add(row);
         }
+
+        if (!cursor.isClosed()) cursor.close();
 
         return ret;
     }

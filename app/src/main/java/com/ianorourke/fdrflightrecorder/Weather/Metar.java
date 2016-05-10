@@ -7,11 +7,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class Metar {
     public Calendar getMetarTime() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         try {
@@ -59,7 +60,7 @@ public class Metar {
         Calendar currentTime = Calendar.getInstance();
         currentTime.setTimeZone(getMetarTime().getTimeZone());
 
-        //TOOD: Fix Time Bug
+        //TODO: Fix Time Bug at Midnight-ish UTC
 
         long timeDifference = currentTime.getTimeInMillis() - getMetarTime().getTimeInMillis();
         return (int) (timeDifference / 1000) / 60;

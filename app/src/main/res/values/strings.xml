@@ -4,6 +4,9 @@
     <string name="title_activity_main">Flight Rec</string>
     <string name="title_activity_map">Flight Recording</string>
 
+    <string name="orientation_notification_image">Image of Aircraft Orientation</string>
+    <string name="orientation_notification_checkbox">Show Again</string>
+
     <string name="map_intent" translatable="false">com.ianorourke.MAP_LOCATION</string>
     <string name="map_lat">LAT</string>
     <string name="map_lon">LON</string>
