@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -44,8 +45,13 @@ public class MainActivity extends AppCompatActivity {
         addDrawerItems();
         setupDrawer();
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        try {
+            ActionBar ab = getSupportActionBar();
+            ab.setDisplayHomeAsUpEnabled(true);
+            ab.setDisplayHomeAsUpEnabled(true);
+        } catch (NullPointerException e) {
+            // Do Nothing
+        }
 
         Log.v("FDR", "Child Count: " + mLinearLayout.getChildCount());
 
@@ -96,7 +102,12 @@ public class MainActivity extends AppCompatActivity {
             ft.replace(mLinearLayout.getId(), newFragment);
             ft.commit();
 
-            getSupportActionBar().setTitle(mNavigationActions[position]);
+            try {
+                ActionBar ab = getSupportActionBar();
+                ab.setTitle(mNavigationActions[position]);
+            } catch (NullPointerException e) {
+                // Do Nothing
+            }
 
             mCurrentFragment = newFragment;
         }
@@ -118,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
     }
 
     @Override

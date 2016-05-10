@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
+ * WriteLog Writes Log to a File on Device
  * Created by ian on 5/24/15.
  */
 public class WriteLog {

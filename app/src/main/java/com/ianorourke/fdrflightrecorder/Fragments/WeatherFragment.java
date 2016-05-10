@@ -2,7 +2,6 @@ package com.ianorourke.fdrflightrecorder.Fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import com.ianorourke.fdrflightrecorder.Weather.GetMetarAsync;
 import com.ianorourke.fdrflightrecorder.Weather.Metar;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Locale;
 
 public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyncInterface {

@@ -1,7 +1,5 @@
 package com.ianorourke.fdrflightrecorder.Weather;
 
-import android.text.Html;
-import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -102,8 +100,6 @@ public class MetarRetriever {
                     visibility_smi.append(text);
                 else if (startTag.equalsIgnoreCase(METAR_TAGS.ALTIM_IN_HG))
                     pressure.append(text);
-                else ;
-                //Log.v("FDR", "Extra Tag: " + startTag);
             } else if (eventType == XmlPullParser.END_TAG) {
                 if (xmlParser.getName().equalsIgnoreCase("METAR")) break;
             }

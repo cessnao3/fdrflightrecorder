@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -23,7 +24,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
-import com.ianorourke.fdrflightrecorder.Fragments.NewRecordFlightFragment;
 import com.ianorourke.fdrflightrecorder.MainActivity;
 import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
@@ -283,7 +283,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Toast.makeText(this, "Connection Failed: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG).show();
     }
 

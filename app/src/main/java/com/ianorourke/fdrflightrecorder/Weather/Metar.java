@@ -1,8 +1,5 @@
 package com.ianorourke.fdrflightrecorder.Weather;
 
-
-import android.util.Log;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

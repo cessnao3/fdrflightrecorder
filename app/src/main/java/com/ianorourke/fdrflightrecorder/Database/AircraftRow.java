@@ -1,6 +1,9 @@
 package com.ianorourke.fdrflightrecorder.Database;
 
+import android.support.annotation.NonNull;
+
 /**
+ * Database Aircraft Row
  * Created by ian on 5/24/15.
  */
 public class AircraftRow implements Comparable<AircraftRow> {
@@ -8,7 +11,7 @@ public class AircraftRow implements Comparable<AircraftRow> {
     private String tail;
 
     @Override
-    public int compareTo(AircraftRow other) {
+    public int compareTo(@NonNull AircraftRow other) {
         if (this.aircraft.equalsIgnoreCase(other.aircraft))
             return this.tail.compareTo(other.tail);
         else

@@ -1,6 +1,5 @@
 package com.ianorourke.fdrflightrecorder.Database;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -32,6 +31,6 @@ public class FlightRow {
     }
 
     public String getTitle() {
-        return plane + " " + tail_number + ((pilot == null || pilot == "") ? "" : " - " + pilot);
+        return plane + " " + tail_number + ((pilot == null || pilot.isEmpty()) ? "" : " - " + pilot);
     }
 }

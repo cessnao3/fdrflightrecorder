@@ -93,6 +93,12 @@ public class FlightDataEvent {
     }
 
     public FlightDataEvent clone() {
+        try {
+            super.clone();
+        } catch (CloneNotSupportedException e) {
+            // Do Nothing
+        }
+
         return new FlightDataEvent(this);
     }
 }
