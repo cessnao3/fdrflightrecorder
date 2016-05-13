@@ -36,7 +36,7 @@ public class WriteLog {
     }
 
     public static void saveLog(Context c, FlightDataLog log, FlightFormatter formatter) {
-        File saveFile = getFile(c, log.getFilename() + FDRFormatter.FILE_EXT);
+        File saveFile = getFile(c, log.getFilename() + formatter.getFileExtension());
         if (saveFile == null) return;
 
         try {

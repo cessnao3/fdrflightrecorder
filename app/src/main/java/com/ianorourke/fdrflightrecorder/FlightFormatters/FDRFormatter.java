@@ -8,7 +8,12 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class FDRFormatter implements FlightFormatter {
-    public final static  String FILE_EXT = ".fdr";
+    private final static  String FILE_EXT = ".fdr";
+
+    @Override
+    public String getFileExtension() {
+        return FILE_EXT;
+    }
 
     @Override
     public String formatLog(FlightDataLog data) {

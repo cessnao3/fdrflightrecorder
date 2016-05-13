@@ -6,7 +6,12 @@ import com.ianorourke.fdrflightrecorder.FlightData.FlightDataLog;
 import java.util.Locale;
 
 public class CSVFormatter implements FlightFormatter {
-    public final static  String FILE_EXT = ".csv";
+    private final static  String FILE_EXT = ".csv";
+
+    @Override
+    public String getFileExtension() {
+        return FILE_EXT;
+    }
 
     @Override
     public String formatLog(FlightDataLog data) {
