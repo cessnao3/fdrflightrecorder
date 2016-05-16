@@ -4,6 +4,7 @@
     <string name="title_activity_main">Flight Rec</string>
     <string name="title_activity_map">Flight Recording</string>
 
+    <string name="orientation_notification_description">Orientation of Phone with Respect to Aircraft for Pitch/Roll/Yaw Movements to be Captured and Recorded</string>
     <string name="orientation_notification_image">Image of Aircraft Orientation</string>
     <string name="orientation_notification_checkbox">Show Again</string>
 

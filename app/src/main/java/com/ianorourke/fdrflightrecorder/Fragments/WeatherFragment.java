@@ -35,15 +35,16 @@ public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyn
 
     public void metarReceived(Metar metar) {
         if (metar != null) {
-            // Set the Raw METER View Screen
+            // Set the Raw METAR Label
+            TextView weatherLabelView = (TextView) getView().findViewById(R.id.weather_raw_title);
 
-            TextView weatherView;
-
-            try {
-                weatherView = (TextView) getView().findViewById(R.id.weather_raw);
-            } catch (NullPointerException e) {
-                weatherView = null;
+            if (weatherLabelView != null) {
+                String rawString = getString(R.string.weather_raw_label) + " for " + metar.station;
+                weatherLabelView.setText(rawString);
             }
+
+            // Set the Raw METER View Screen
+            TextView weatherView =  (TextView) getView().findViewById(R.id.weather_raw);
 
             if (weatherView != null) {
                 weatherView.setText(metar.raw);
@@ -69,17 +70,47 @@ public class WeatherFragment extends Fragment implements GetMetarAsync.MetarAsyn
                 }
             }
 
+            // Set Visibility Display
+            TextView visView = (TextView) getView().findViewById(R.id.weather_vis);
+
+            if (visView != null) {
+                String visString = getString(R.string.weather_vis_label) + " ";
+                visString += metar.visibility_smi + " smi";
+
+                visView.setText(visString);
+            }
+
             // Set the Wind Display
             TextView windView = (TextView) getView().findViewById(R.id.weather_wind);
 
             if (windView != null) {
                 String windString = "";
-                windString += (getString(R.string.weather_wind_label)) + " ";
+                windString += getString(R.string.weather_wind_label) + " ";
                 windString += metar.wind_speed_kt + " " + ((metar.wind_speed_kt == 1) ? "kt" : "kts");
                 windString += " from " + ((metar.wind_dir < 100) ? "0" : "") + ((metar.wind_dir < 10) ? "0" : "") + metar.wind_dir;
                 windString += (((metar.wind_gust_kt != 0) ? " gusting to " + metar.wind_gust_kt + ((metar.wind_gust_kt == 1) ? "kt" : "kts") : ""));
 
                 windView.setText(windString);
+            }
+
+            // Set the Temperature Display
+            TextView tempView = (TextView) getView().findViewById(R.id.weather_temp);
+
+            if (tempView != null) {
+                String tempString = getString(R.string.weather_temp_label) + " ";
+                tempString += metar.temp_c + "C, (Dew " + metar.dewpoint_c + " C)";
+
+                tempView.setText(tempString);
+            }
+
+            // Set the Pressure Display
+            TextView presView = (TextView) getView().findViewById(R.id.weather_pres);
+
+            if (presView != null) {
+                String presString = getString(R.string.weather_pres_label) + " ";
+                presString += metar.pressure + " in hg";
+
+                presView.setText(presString);
             }
         }
     }
