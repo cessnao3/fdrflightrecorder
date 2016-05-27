@@ -6,12 +6,15 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,6 +30,8 @@ import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
 import com.ianorourke.fdrflightrecorder.MainActivity;
 import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
+import com.ianorourke.fdrflightrecorder.Sensors.UDPReader;
+import com.ianorourke.fdrflightrecorder.Sensors.UDPVals;
 import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
 
 import java.util.Calendar;
@@ -34,7 +39,9 @@ import java.util.GregorianCalendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, GyroscopeReader.GyroscopeReaderInterface, SoundStart.SoundStartInterface {
+public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, GyroscopeReader.GyroscopeReaderInterface, UDPReader.UDPReaderInterface, SoundStart.SoundStartInterface {
+    private static boolean DEBUG = false;
+
     private static boolean running = false;
 
     public static boolean isRunning() {
@@ -71,6 +78,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private LatLng currentLoc;
 
     private GyroscopeReader gyroscopeReader;
+    private UDPReader udpReader;
 
     private boolean isStarted = false;
 
@@ -101,20 +109,25 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public void onCreate() {
         super.onCreate();
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+        if (!DEBUG) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
 
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(timeInterval / 2);
+            locationRequest = LocationRequest.create();
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setInterval(timeInterval / 2);
+
+            gyroscopeReader = new GyroscopeReader(this);
+            gyroscopeReader.setInterface(this);
+        } else {
+            udpReader = new UDPReader(this);
+            udpReader.setInterface(this);
+        }
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        gyroscopeReader = new GyroscopeReader(this);
-        gyroscopeReader.setInterface(this);
     }
 
     @Override
@@ -132,15 +145,17 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         soundStart = new SoundStart(MIN_AMPLITUDE, NUM_HOLD_SECONDS, this);
 
-        // Checking if Null
-        if (mGoogleApiClient == null) Log.v("FDR", "Google API Client Null");
-        if (locationRequest == null) Log.v("FDR", "Location Request Null");
+        if (!DEBUG) {
+            // Checking if Null
+            if (mGoogleApiClient == null) Log.v("FDR", "Google API Client Null");
+            if (locationRequest == null) Log.v("FDR", "Location Request Null");
 
-        if (mGoogleApiClient == null || locationRequest == null) {
-            stopSelf();
-            return START_NOT_STICKY;
-        } else {
-            mGoogleApiClient.connect();
+            if (mGoogleApiClient == null || locationRequest == null) {
+                stopSelf();
+                return START_NOT_STICKY;
+            } else {
+                mGoogleApiClient.connect();
+            }
         }
 
         // Wakelock
@@ -205,8 +220,12 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         startTime = 0;
 
-        gyroscopeReader.resetCalibration();
-        gyroscopeReader.setEnabled(true, true);
+        if (!DEBUG) {
+            gyroscopeReader.resetCalibration();
+            gyroscopeReader.setEnabled(true, true);
+        } else {
+            udpReader.start();
+        }
 
         updateTimer.schedule(new TimerTask() {
             @Override
@@ -235,11 +254,27 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     }
 
     @Override
+    public void receivedUDPValues(UDPVals vals) {
+
+        flightEvent.setRoll(vals.bank);
+        flightEvent.setPitch(vals.pitch);
+
+        flightEvent.setLat(vals.lat);
+        flightEvent.setLon(vals.lon);
+        flightEvent.setAltitude((int) (vals.alt * METERS_TO_FEET));
+        flightEvent.setHeading((int) vals.heading);
+        flightEvent.setGroundSpeed((int) (vals.airspeed * METERS_SECONDS_TO_KNOTS));
+
+        notificationBuilder.setContentText("Connected to " + vals.title);
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+
+        hasNewValue = true;
+    }
+
+    @Override
     public void receivedGyroValues(float x, float y) {
         flightEvent.setRoll(x);
         flightEvent.setPitch(y);
-
-        //Log.v("FDR", "Roll: " + x + ", Pitch: " + y);
     }
 
     @Override
@@ -248,6 +283,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             Log.v("FDR", "Null Location");
             return;
         }
+
+        // TODO: Why creating currentLoc and then just calling it?
         currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
 
         flightEvent.setLat(currentLoc.latitude);
@@ -270,7 +307,13 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     @Override
     public void onConnected(Bundle dataBundle) {
-        if (locationRequest != null)
+        if (Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (locationRequest != null && !DEBUG)
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
     }
 
@@ -289,18 +332,23 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     @Override
     public void onDestroy() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-
         wakeLock.release();
         wakeLock = null;
 
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
-        mGoogleApiClient = null;
+        if (!DEBUG) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+                mGoogleApiClient.disconnect();
+            mGoogleApiClient = null;
+
+            gyroscopeReader.setEnabled(false);
+        } else {
+            udpReader.stop();
+        }
 
         if (updateTimer != null) updateTimer.cancel();
         updateTimer = null;
-
-        gyroscopeReader.setEnabled(false);
 
         Log.v("FDR", "Service Destroyed");
 
