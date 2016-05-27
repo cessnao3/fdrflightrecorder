@@ -40,7 +40,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, GyroscopeReader.GyroscopeReaderInterface, UDPReader.UDPReaderInterface, SoundStart.SoundStartInterface {
-    private static boolean DEBUG = false;
+    private static boolean DEBUG = true;
 
     private static boolean running = false;
 
@@ -123,7 +123,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             gyroscopeReader = new GyroscopeReader(this);
             gyroscopeReader.setInterface(this);
         } else {
-            udpReader = new UDPReader(this);
+            udpReader = new UDPReader();
             udpReader.setInterface(this);
         }
 
@@ -259,8 +259,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         flightEvent.setRoll(vals.bank);
         flightEvent.setPitch(vals.pitch);
 
-        flightEvent.setLat(vals.lat);
-        flightEvent.setLon(vals.lon);
+        currentLoc = new LatLng(vals.lat, vals.lon);
+
+        flightEvent.setLat(currentLoc.latitude);
+        flightEvent.setLon(currentLoc.longitude);
         flightEvent.setAltitude((int) (vals.alt * METERS_TO_FEET));
         flightEvent.setHeading((int) vals.heading);
         flightEvent.setGroundSpeed((int) (vals.airspeed * METERS_SECONDS_TO_KNOTS));
@@ -284,7 +286,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             return;
         }
 
-        // TODO: Why creating currentLoc and then just calling it?
         currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
 
         flightEvent.setLat(currentLoc.latitude);
@@ -358,6 +359,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         soundStart.cancelAll();
         soundStart = null;
 
+        //TODO: Fix 'Mark All Flights Completed' bug in event of app crash
         databaseHelper.markAllFlightsCompleted();
 
         //Final Closeout

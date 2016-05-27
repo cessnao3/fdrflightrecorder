@@ -220,7 +220,7 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
             CameraUpdate cameraUpdate;
 
             if (mLocationMarker == null) {
-                mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Location").position(location).draggable(false));
+                mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Aircraft Location").position(location).draggable(false));
                 cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), ((lastZoom > 0.0f) ? lastZoom : 12.0f));
                 lastZoom = -1.0f;
                 mMap.moveCamera(cameraUpdate);

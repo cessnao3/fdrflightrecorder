@@ -98,7 +98,7 @@ public class AircraftFragment extends Fragment {
                                 EditText aircraftType = (EditText) alertView.findViewById(R.id.aircraft_type);
                                 EditText aircraftTail = (EditText) alertView.findViewById(R.id.aircraft_tail);
 
-                                databaseHelper.addAircraft(aircraftType.getText().toString(), aircraftTail.getText().toString());
+                                databaseHelper.addAircraft(aircraftType.getText().toString().trim(), aircraftTail.getText().toString().trim());
 
                                 UpdateLists();
                             }
