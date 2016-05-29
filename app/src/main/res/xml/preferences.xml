@@ -11,7 +11,7 @@
             android:title="Pilot Name"
             android:hint="Pilot Name"
             android:summary="The Name of the Pilot"
-            android:defaultValue=""
+            android:defaultValue="@string/prefs_pilot_default_name"
             android:inputType="textPersonName"/>
 
     </PreferenceCategory>
@@ -55,6 +55,12 @@
             android:title="Show Orientation Alert"
             android:summary="Shows the Phone Orientation Instructions before New Flight"
             android:defaultValue="true"/>
+
+        <CheckBoxPreference
+            android:key="@string/pref_debug_enabled"
+            android:title="Enable UDP Debuging"
+            android:summary="Allows application to recieve UDP commands from FSX"
+            android:defaultValue="false"/>
 
     </PreferenceCategory>
 

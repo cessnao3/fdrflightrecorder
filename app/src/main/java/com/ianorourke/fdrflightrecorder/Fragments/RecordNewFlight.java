@@ -13,33 +13,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.ianorourke.fdrflightrecorder.Database.AircraftRow;
 import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
+import com.ianorourke.fdrflightrecorder.FlightData.FlightDataEvent;
 import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Receivers.MapReceiver;
 import com.ianorourke.fdrflightrecorder.Services.BackgroundLocationService;
 import com.melnykov.fab.FloatingActionButton;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
+import java.util.Locale;
 
-public class NewRecordFlightFragment extends Fragment implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface, OnMapReadyCallback {
-
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-
-    private Marker mLocationMarker;
-    private Polyline mPolyLine;
+public class RecordNewFlight extends Fragment implements MapReceiver.MapDataInterface, BackgroundLocationService.BackgroundLocationServiceInterface {
 
     private FloatingActionButton startStopButton;
 
@@ -51,8 +40,6 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_new_flight, container, false);
-
-        setUpMapIfNeeded();
 
         MapReceiver.dataInterface = this;
 
@@ -71,16 +58,6 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
                 if (BackgroundLocationService.isRunning()) {
                     getActivity().stopService(serviceIntent);
                 } else {
-                    MapReceiver.markerPoints.clear();
-
-                    mMap.clear();
-
-                    if (mLocationMarker != null) mLocationMarker.remove();
-                    mLocationMarker = null;
-
-                    if (mPolyLine != null) mPolyLine.remove();
-                    mPolyLine = null;
-
                     FlightDatabaseHelper databaseHelper = FlightDatabaseHelper.getInstance(getActivity());
 
                     final ArrayList<AircraftRow> aircraft = new ArrayList<>(databaseHelper.getAllAircraft());
@@ -102,6 +79,7 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
                                     serviceIntent.putExtra(getString(R.string.service_pilot_name), sharedPreferences.getString(getString(R.string.pref_pilot_name), ""));
                                     serviceIntent.putExtra(getString(R.string.service_plane_type), aircraft.get(which).getAircraft());
                                     serviceIntent.putExtra(getString(R.string.service_plane_tail), aircraft.get(which).getTail());
+                                    serviceIntent.putExtra(getString(R.string.service_debug), sharedPreferences.getBoolean(getString(R.string.pref_debug_enabled), false));
 
                                     getActivity().startService(serviceIntent);
                                 }
@@ -117,7 +95,7 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
 
                         AlertDialog.Builder orientation_builder = new AlertDialog.Builder(getActivity());
                         orientation_builder
-                                .setTitle("Phone Orientation")
+                                //.setTitle("Phone Orientation")
                                 .setView(alert_view)
                                 .setPositiveButton("Close", new DialogInterface.OnClickListener() {
                                     @Override
@@ -143,67 +121,6 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        setUpMapIfNeeded();
-    }
-
-    static CameraPosition lastLocation = null;
-    static float lastZoom = -1.0f;
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mMap.clear();
-
-        lastLocation = mMap.getCameraPosition();
-
-        if (BackgroundLocationService.isRunning())
-            lastZoom = lastLocation.zoom;
-
-        mMap = null;
-        mLocationMarker = null;
-        mPolyLine = null;
-    }
-
-    private SupportMapFragment getMapFragment() {
-        FragmentManager fm;
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            fm = getFragmentManager();
-        } else {
-            fm = getChildFragmentManager();
-        }
-
-        return (SupportMapFragment) fm.findFragmentById(R.id.map);
-    }
-
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            getMapFragment().getMapAsync(this);
-        }
-    }
-
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Check if we were successful in obtaining the map.
-        if (mMap != null) {
-            setUpMap();
-        }
-    }
-
-    private void setUpMap() {
-        if (lastLocation != null) {
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(lastLocation));
-            lastLocation = null;
-        } else
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(34.738, -92.894), 4.0f));
-    }
-
-    @Override
     public void backgroundServiceChanged() {
         if (BackgroundLocationService.isRunning())
             //startStopButton.setImageDrawable(getActivity().getResources().getDrawable(android.R.drawable.ic_media_pause));
@@ -215,26 +132,38 @@ public class NewRecordFlightFragment extends Fragment implements MapReceiver.Map
         startStopButton.setEnabled(true);
     }
 
-    public void onLocationReceive(LatLng location) {
-        if (mMap != null) {
-            CameraUpdate cameraUpdate;
+    public void onLocationReceive(FlightDataEvent dataEvent) {
+        try {
+            TextView locationView = (TextView) getView().findViewById(R.id.flight_loc);
 
-            if (mLocationMarker == null) {
-                mLocationMarker = mMap.addMarker(new MarkerOptions().title("Current Aircraft Location").position(location).draggable(false));
-                cameraUpdate = CameraUpdateFactory.newLatLngZoom(mLocationMarker.getPosition(), ((lastZoom > 0.0f) ? lastZoom : 12.0f));
-                lastZoom = -1.0f;
-                mMap.moveCamera(cameraUpdate);
-            } else {
-                mLocationMarker.setPosition(location);
-                cameraUpdate = CameraUpdateFactory.newLatLng(mLocationMarker.getPosition());
-                mMap.animateCamera(cameraUpdate);
-            }
+            locationView.setText(String.format(Locale.US, "%.3f, %.3f", dataEvent.getLat(), dataEvent.getLon()));
+        } catch (NullPointerException e) {
+            // Do Nothing
+        }
 
-            if (mPolyLine == null) {
-                mPolyLine = mMap.addPolyline(new PolylineOptions().addAll(MapReceiver.markerPoints).width(12.0f));
-            } else {
-                mPolyLine.setPoints(MapReceiver.markerPoints);
-            }
+        try {
+            TextView altView = (TextView) getView().findViewById(R.id.flight_alt);
+
+            String alt_string = String.format(Locale.US, "%d ft", dataEvent.getAltitude());
+            altView.setText(alt_string);
+        } catch (NullPointerException e) {
+            // Do Nothing
+        }
+
+        try {
+            TextView rollView = (TextView) getView().findViewById(R.id.flight_roll);
+            String roll_string = String.format(Locale.US, "%.2f deg", dataEvent.getRoll());
+            rollView.setText(roll_string);
+        } catch (NullPointerException e) {
+            // Do Nothing
+        }
+
+        try {
+            TextView pitchView = (TextView) getView().findViewById(R.id.flight_pitch);
+            String pitch_string = String.format(Locale.US, "%.2f deg", dataEvent.getPitch());
+            pitchView.setText(pitch_string);
+        } catch (NullPointerException e) {
+            // Do Nothing
         }
     }
 

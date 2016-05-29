@@ -1,11 +1,6 @@
-package com.ianorourke.fdrflightrecorder.Sensors;
+package com.ianorourke.fdrflightrecorder.UdpReader;
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 
 /**
  * UDPReader - Received data from UDP socket via C# application from FSX for debugging purposes... Should be removed/disabled before release

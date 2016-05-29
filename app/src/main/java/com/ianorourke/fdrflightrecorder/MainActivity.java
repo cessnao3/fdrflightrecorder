@@ -18,10 +18,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.ianorourke.fdrflightrecorder.Fragments.AircraftFragment;
-import com.ianorourke.fdrflightrecorder.Fragments.NewRecordFlightFragment;
+import com.ianorourke.fdrflightrecorder.Fragments.RecordNewFlight;
 import com.ianorourke.fdrflightrecorder.Fragments.PrefsFragment;
 import com.ianorourke.fdrflightrecorder.Fragments.RecordedFlightsFragment;
-import com.ianorourke.fdrflightrecorder.Fragments.WeatherFragment;
 
 public class MainActivity extends AppCompatActivity {
     private String[] mNavigationActions;
@@ -83,15 +82,12 @@ public class MainActivity extends AppCompatActivity {
         if (position == getResources().getInteger(R.integer.nav_aircraft)) {
             if (mCurrentFragment == null || mCurrentFragment.getClass() != AircraftFragment.class)
                 newFragment = new AircraftFragment();
-        } else if (position == getResources().getInteger(R.integer.nav_weather)) {
-            if (mCurrentFragment == null || mCurrentFragment.getClass() != WeatherFragment.class)
-                newFragment = new WeatherFragment();
         } else if (position == getResources().getInteger(R.integer.nav_recorded)) {
             if (mCurrentFragment == null || mCurrentFragment.getClass() != RecordedFlightsFragment.class)
                 newFragment = new RecordedFlightsFragment();
         } else if (position == getResources().getInteger(R.integer.nav_new)) {
-            if (mCurrentFragment == null || mCurrentFragment.getClass() != NewRecordFlightFragment.class)
-                newFragment = new NewRecordFlightFragment();
+            if (mCurrentFragment == null || mCurrentFragment.getClass() != RecordNewFlight.class)
+                newFragment = new RecordNewFlight();
         } else if (position == getResources().getInteger(R.integer.nav_settings)) {
             if (mCurrentFragment == null || mCurrentFragment.getClass() != PrefsFragment.class)
                 newFragment = new PrefsFragment();

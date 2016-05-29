@@ -1,28 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-
-    <fragment
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/map"
-        tools:context=".MainActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
+    android:layout_height="fill_parent"
+    android:layout_margin="5dp">
 
     <com.melnykov.fab.FloatingActionButton
         android:id="@+id/fab_new_flight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right|bottom"
+        android:layout_gravity="end|bottom"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
         android:src="@android:drawable/ic_media_play"
         fab:fab_colorNormal="@color/primary"
         fab:fab_colorPressed="@color/primary_dark"
         fab:fab_colorRipple="@color/ripple" />
 
-</FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Location: "
+        android:textStyle="bold"
+        android:id="@+id/flight_loc_label"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="LOCATION"
+        android:id="@+id/flight_loc"
+        android:layout_alignTop="@id/flight_loc_label"
+        android:layout_toEndOf="@id/flight_loc_label" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Altitude: "
+        android:textStyle="bold"
+        android:id="@+id/flight_alt_label"
+        android:layout_below="@id/flight_loc_label"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="ALTITUDE"
+        android:id="@+id/flight_alt"
+        android:layout_alignTop="@id/flight_alt_label"
+        android:layout_toEndOf="@id/flight_alt_label" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Pitch: "
+        android:textStyle="bold"
+        android:id="@+id/flight_pitch_label"
+        android:layout_below="@id/flight_alt_label"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="PITCH"
+        android:id="@+id/flight_pitch"
+        android:layout_alignTop="@id/flight_pitch_label"
+        android:layout_toEndOf="@id/flight_pitch_label" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Roll: "
+        android:textStyle="bold"
+        android:id="@+id/flight_roll_label"
+        android:layout_below="@id/flight_pitch_label"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="ROLL"
+        android:id="@+id/flight_roll"
+        android:layout_alignTop="@id/flight_roll_label"
+        android:layout_toEndOf="@id/flight_roll_label" />
+</RelativeLayout>

@@ -1,4 +1,4 @@
-package com.ianorourke.fdrflightrecorder.Sensors;
+package com.ianorourke.fdrflightrecorder.UdpReader;
 
 /**
  * UDPVals

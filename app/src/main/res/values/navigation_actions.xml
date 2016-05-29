@@ -2,15 +2,13 @@
 <resources>
     <string-array name="navigation_actions">
         <item>Aircraft</item>
-        <item>Weather</item>
         <item>Flights</item>
         <item>Record Flight</item>
         <item>Settings</item>
     </string-array>
 
     <integer name="nav_aircraft">0</integer>
-    <integer name="nav_weather">1</integer>
-    <integer name="nav_recorded">2</integer>
-    <integer name="nav_new">3</integer>
-    <integer name="nav_settings">4</integer>
+    <integer name="nav_recorded">1</integer>
+    <integer name="nav_new">2</integer>
+    <integer name="nav_settings">3</integer>
 </resources>

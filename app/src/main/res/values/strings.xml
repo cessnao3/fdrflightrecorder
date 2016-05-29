@@ -9,8 +9,14 @@
     <string name="orientation_notification_checkbox">Show Again</string>
 
     <string name="map_intent" translatable="false">com.ianorourke.MAP_LOCATION</string>
-    <string name="map_lat">LAT</string>
-    <string name="map_lon">LON</string>
+    <string name="flight_lat">LAT</string>
+    <string name="flight_lon">LON</string>
+    <string name="flight_roll">ROLL</string>
+    <string name="flight_pitch">PITCH</string>
+    <string name="flight_alt">ALT</string>
+    <string name="flight_ground_speed">GSPD</string>
+    <string name="flight_heading">HEAD</string>
+    <string name="flight_rec_time">SEC</string>
 
     <string name="save_folder">Flight Recorder</string>
 
@@ -20,6 +26,7 @@
     <string name="service_pilot_name">service_pilot_name</string>
     <string name="service_plane_type">service_plane_type</string>
     <string name="service_plane_tail">service_plane_tail</string>
+    <string name="service_debug">service_debug</string>
 
     <string name="prefs_app">PrefsApp</string>
     <string name="prefs_aircraft">PrefsAircraft</string>
@@ -27,6 +34,8 @@
     <string name="prefs_pilots">PrefsPilots</string>
     <string name="prefs_pilots_current">PrefsPilotsCurrent</string>
     <string name="prefs_pilots_all">PrefsPilotsAll</string>
+
+    <string name="prefs_pilot_default_name">Pilot</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

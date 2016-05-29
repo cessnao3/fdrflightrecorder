@@ -30,8 +30,8 @@ import com.ianorourke.fdrflightrecorder.Database.FlightDatabaseHelper;
 import com.ianorourke.fdrflightrecorder.MainActivity;
 import com.ianorourke.fdrflightrecorder.R;
 import com.ianorourke.fdrflightrecorder.Sensors.GyroscopeReader;
-import com.ianorourke.fdrflightrecorder.Sensors.UDPReader;
-import com.ianorourke.fdrflightrecorder.Sensors.UDPVals;
+import com.ianorourke.fdrflightrecorder.UdpReader.UDPReader;
+import com.ianorourke.fdrflightrecorder.UdpReader.UDPVals;
 import com.ianorourke.fdrflightrecorder.Sound.SoundStart;
 
 import java.util.Calendar;
@@ -40,7 +40,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, GyroscopeReader.GyroscopeReaderInterface, UDPReader.UDPReaderInterface, SoundStart.SoundStartInterface {
-    private static boolean DEBUG = true;
+    private boolean DEBUG = true;
 
     private static boolean running = false;
 
@@ -51,6 +51,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     IBinder mBinder = new LocalBinder();
 
     public class LocalBinder extends Binder {
+        @SuppressWarnings("unused")
         public BackgroundLocationService getServerInstance() {
             return BackgroundLocationService.this;
         }
@@ -99,15 +100,17 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     private final float METERS_SECONDS_TO_KNOTS = 1.94384f;
 
     private boolean soundStartEnabled;
-    private boolean soundStopEnabled;
+
 
     private FlightDatabaseHelper databaseHelper;
 
     private boolean hasNewValue = true;
 
     @Override
-    public void onCreate() {
-        super.onCreate();
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
+        DEBUG = intent.getBooleanExtra(getString(R.string.service_debug), false);
 
         if (!DEBUG) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -128,14 +131,9 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         }
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
 
         soundStartEnabled = intent.getBooleanExtra(getString(R.string.service_soundstart), false);
-        soundStopEnabled = intent.getBooleanExtra(getString(R.string.service_soundstop), false);
+        boolean soundStopEnabled = intent.getBooleanExtra(getString(R.string.service_soundstop), false);
 
         String pilot = intent.getStringExtra(getString(R.string.service_pilot_name));
         if (pilot == null) pilot = "";
@@ -243,8 +241,14 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
                     Intent intent = new Intent();
                     intent.setAction(getString(R.string.map_intent));
-                    intent.putExtra(getString(R.string.map_lat), currentLoc.latitude);
-                    intent.putExtra(getString(R.string.map_lon), currentLoc.longitude);
+                    intent.putExtra(getString(R.string.flight_lat), flightEvent.getLat());
+                    intent.putExtra(getString(R.string.flight_lon), flightEvent.getLon());
+                    intent.putExtra(getString(R.string.flight_roll), flightEvent.getRoll());
+                    intent.putExtra(getString(R.string.flight_pitch), flightEvent.getPitch());
+                    intent.putExtra(getString(R.string.flight_alt), flightEvent.getAltitude());
+                    intent.putExtra(getString(R.string.flight_ground_speed), flightEvent.getGroundSpeed());
+                    intent.putExtra(getString(R.string.flight_heading), flightEvent.getHeading());
+                    intent.putExtra(getString(R.string.flight_rec_time), flightEvent.getSeconds());
                     sendBroadcast(intent);
 
                     hasNewValue = false;
@@ -296,7 +300,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         float accuracy = location.getAccuracy() * METERS_TO_FEET;
 
-        if (soundStartEnabled && !isStarted) {
+        if (!isStarted) {
             notificationBuilder.setContentText("Waiting for Sound Start...");
         } else {
             notificationBuilder.setContentText("Accuracy: " + ((int) accuracy) + " Feet");
